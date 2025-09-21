@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset your password - DayKickOff</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+        }
+        h1 {
+            color: #2563eb;
+            font-size: 24px;
+            margin: 0 0 10px;
+        }
+        .content {
+            margin: 30px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .button:hover {
+            opacity: 0.9;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e5e5;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .link-alt {
+            word-break: break-all;
+            color: #666;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .warning {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 20px 0;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#667eea" stroke-width="3"/>
+                <path d="M50 20 L50 50 L70 70" stroke="#764ba2" stroke-width="3" stroke-linecap="round" fill="none"/>
+            </svg>
+            <h1>DayKickOff</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{ .Email }},</p>
+            
+            <p>We received a request to reset your password. Click the button below to set a new password.</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery" class="button">
+                    Reset Password
+                </a>
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ Important:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li>This link is valid for 1 hour</li>
+                    <li>If you didn't request a password reset, you can ignore this email</li>
+                    <li>If you're concerned about your account security, please contact support</li>
+                </ul>
+            </div>
+            
+            <div class="link-alt">
+                <p>If the button doesn't work, copy and paste the following URL into your browser:</p>
+                <p>{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>If you didn't request this email, your account is safe and you don't need to do anything.</p>
+            <p>&copy; 2024 DayKickOff. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

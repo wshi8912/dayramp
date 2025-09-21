@@ -1,0 +1,13 @@
+{
+  "name": "DayKickOff",
+  "short_name": "DayKickOff",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    { "src": "/modetimer-logo_512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/modetimer-logo_512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
+

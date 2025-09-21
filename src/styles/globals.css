@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 215 20% 15%;
+    /* Modern dark gray text */
+
+    --muted: 210 40% 98%;
+    /* Very light blue-gray for muted elements */
+    --muted-foreground: 215 16% 47%;
+    /* Medium gray for muted text */
+
+    --popover: 0 0% 100%;
+    /* White background for popovers */
+    --popover-foreground: 215 20% 15%;
+    /* Dark text for popovers */
+
+    --border: 214 32% 91%;
+    /* Light blue-gray border */
+    --input: 214 32% 91%;
+    /* Light blue-gray input border */
+
+    --card: 0 0% 100%;
+    /* White card background */
+    --card-foreground: 215 20% 15%;
+    /* Dark card text */
+
+    --primary: 221 83% 53%;
+    /* Modern blue primary (Blue 500) */
+    --primary-foreground: 210 40% 98%;
+    /* Light text on primary */
+
+    --secondary: 210 40% 96%;
+    /* Very light blue-gray secondary */
+    --secondary-foreground: 215 20% 15%;
+    /* Dark text on secondary */
+
+    --accent: 238 77% 95%;
+    /* Very light indigo accent */
+    --accent-foreground: 231 48% 48%;
+    /* Indigo text on accent */
+
+    --destructive: 0 84% 60%;
+    /* Red for destructive actions */
+    --destructive-foreground: 210 40% 98%;
+    /* Light text on destructive */
+
+    --ring: 221 83% 53%;
+    /* Blue ring color matching primary */
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 210 40% 98%;
+    /* Very light blue-gray */
+
+    --sidebar-foreground: 215 20% 15%;
+    /* Dark gray text */
+
+    --sidebar-primary: 221 83% 53%;
+    /* Blue primary */
+
+    --sidebar-primary-foreground: 210 40% 98%;
+    /* Light text on primary */
+
+    --sidebar-accent: 210 40% 96%;
+    /* Light blue-gray accent */
+
+    --sidebar-accent-foreground: 215 20% 15%;
+    /* Dark text on accent */
+
+    --sidebar-border: 214 32% 91%;
+    /* Light border */
+
+    --sidebar-ring: 221 83% 53%;
+    /* Blue ring */
+  }
+
+  .dark {
+    --background: 222 84% 5%;
+    --foreground: 210 40% 98%;
+
+    --muted: 215 28% 17%;
+    --muted-foreground: 217 11% 65%;
+
+    --popover: 222 84% 5%;
+    --popover-foreground: 210 40% 98%;
+
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+
+    --card: 222 84% 5%;
+    --card-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 84% 5%;
+
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --accent: 238 77% 15%;
+    --accent-foreground: 238 77% 80%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 217 91% 60%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 215 28% 17%;
+
+    --sidebar-foreground: 210 40% 98%;
+
+    --sidebar-primary: 217 91% 60%;
+
+    --sidebar-primary-foreground: 222 84% 5%;
+
+    --sidebar-accent: 215 28% 17%;
+
+    --sidebar-accent-foreground: 210 40% 98%;
+
+    --sidebar-border: 215 28% 17%;
+
+    --sidebar-ring: 217 91% 60%;
+  }
+
+  ::selection {
+    @apply text-black;
+    @apply bg-cyan-400;
+  }
+
+  *:focus-visible {
+    @apply outline;
+    @apply outline-2;
+    @apply outline-offset-2;
+    @apply outline-pink-500;
+  }
+
+  * {
+    @apply border-border;
+    @apply min-w-0;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  html {
+    @apply h-full;
+  }
+
+  body {
+    @apply h-full;
+  }
+
+  a {
+    @apply text-muted-foreground hover:text-foreground transition-colors;
+  }
+
+  nav a {
+    @apply text-muted-foreground hover:text-foreground transition-colors;
+  }
+
+  /* Target the specific mobile nav sheet */
+  .mobile-nav-sheet {
+    background-color: hsl(var(--sidebar-background)) !important;
+    /* Use !important for testing */
+  }
+}

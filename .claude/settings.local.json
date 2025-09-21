@@ -1,0 +1,48 @@
+{
+  "env": {
+    "API_TIMEOUT_MS": "600000"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(rsync:*)",
+      "Bash(npm install)",
+      "Bash(npx supabase db reset:*)",
+      "Bash(npm run generate-types:*)",
+      "WebSearch",
+      "Bash(git worktree add:*)",
+      "Read(/home/swa89/dev/modetimer-fix/**)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Read(/home/swa89/dev/modetimer-dialog/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/app/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/components/ui/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/components/ui/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/components/ui/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/app/(timers)/hiit-timer/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/app/(timers)/pomodoro-timer/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/app/(timers)/breathing-timer/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/app/(timers)/box-breathing-timer/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/app/(timers)/hiit-timer/**)",
+      "Read(/home/swa89/dev/modetimer-dialog/src/app/(timers)/breathing-timer/**)",
+      "Bash(npm run supabase:status:*)",
+      "Bash(docker logs:*)",
+      "Bash(npm run migration:up:*)",
+      "Bash(npm run supabase:reset:*)",
+      "Bash(npx supabase:*)",
+      "Bash(docker exec:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run supabase:stop:*)",
+      "Bash(npm run supabase:start:*)",
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(pkill:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(lsof:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
