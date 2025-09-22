@@ -1,24 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { postJSON } from '@/libs/api';
 import { useRouter } from 'next/navigation';
+import { toUTC } from '@/libs/tz';
 
-export function AddTaskButton() {
+type TimeType = 'none' | 'range' | 'deadline';
+
+export function AddTaskButton({ tz }: { tz: string }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
+  const [note, setNote] = useState('');
+  const [timeType, setTimeType] = useState<TimeType>('none');
+  const [startLocal, setStartLocal] = useState('');
+  const [endLocal, setEndLocal] = useState('');
+  const [dueLocal, setDueLocal] = useState('');
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
+  const canSave = useMemo(() => title.trim().length > 0, [title]);
+
+  const reset = () => {
+    setTitle('');
+    setNote('');
+    setTimeType('none');
+    setStartLocal('');
+    setEndLocal('');
+    setDueLocal('');
+  };
+
   const save = async () => {
-    if (!title.trim() || saving) return;
+    if (!canSave || saving) return;
     setSaving(true);
     try {
-      await postJSON('/api/tasks', { title: title.trim(), source: 'manual', status: 'todo' });
-      setTitle('');
+      const payload: Record<string, any> = {
+        title: title.trim(),
+        note: note.trim() || null,
+        status: 'todo',
+        source: 'manual',
+      };
+      if (timeType === 'none') {
+        payload.startAt = null;
+        payload.endAt = null;
+        payload.dueAt = null;
+      } else if (timeType === 'range') {
+        payload.startAt = startLocal ? toUTC(startLocal, tz) : null;
+        payload.endAt = endLocal ? toUTC(endLocal, tz) : null;
+        payload.dueAt = null;
+      } else if (timeType === 'deadline') {
+        payload.startAt = null;
+        payload.endAt = null;
+        payload.dueAt = dueLocal ? toUTC(dueLocal, tz) : null;
+      }
+
+      await postJSON('/api/tasks', payload);
+      reset();
       setOpen(false);
       router.refresh();
     } catch (e) {
@@ -29,7 +68,7 @@ export function AddTaskButton() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
       <DialogTrigger asChild>
         <Button variant='default'>Add Task</Button>
       </DialogTrigger>
@@ -37,19 +76,64 @@ export function AddTaskButton() {
         <DialogHeader>
           <DialogTitle>Add Task</DialogTitle>
         </DialogHeader>
-        <div className='flex items-center gap-2'>
-          <Input
-            placeholder='Task title'
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') save();
-            }}
-            autoFocus
-          />
-          <Button onClick={save} disabled={!title.trim() || saving}>
-            {saving ? 'Saving…' : 'Save'}
-          </Button>
+
+        <div className='py-1 space-y-4'>
+          <div className='flex flex-col gap-2'>
+            <label className='text-sm'>Title</label>
+            <Input
+              placeholder='Task title'
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save();
+              }}
+              autoFocus
+            />
+          </div>
+
+          <div className='flex flex-col gap-2'>
+            <label className='text-sm'>Note</label>
+            <textarea
+              placeholder='Optional notes'
+              className='min-h-[96px] rounded-md border bg-background p-2'
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </div>
+
+          <div className='flex flex-col gap-2'>
+            <label className='text-sm'>Time</label>
+            <div className='flex gap-2'>
+              <Button type='button' variant={timeType === 'none' ? 'default' : 'outline'} onClick={() => setTimeType('none')}>None</Button>
+              <Button type='button' variant={timeType === 'range' ? 'default' : 'outline'} onClick={() => setTimeType('range')}>Range</Button>
+              <Button type='button' variant={timeType === 'deadline' ? 'default' : 'outline'} onClick={() => setTimeType('deadline')}>Deadline</Button>
+            </div>
+            {timeType === 'range' && (
+              <div className='grid grid-cols-1 gap-2 md:grid-cols-2'>
+                <div className='flex flex-col gap-2'>
+                  <label className='text-xs text-muted-foreground'>Start ({tz})</label>
+                  <Input type='datetime-local' value={startLocal} onChange={(e) => setStartLocal(e.target.value)} />
+                </div>
+                <div className='flex flex-col gap-2'>
+                  <label className='text-xs text-muted-foreground'>End ({tz})</label>
+                  <Input type='datetime-local' value={endLocal} onChange={(e) => setEndLocal(e.target.value)} />
+                </div>
+              </div>
+            )}
+            {timeType === 'deadline' && (
+              <div className='flex flex-col gap-2'>
+                <label className='text-xs text-muted-foreground'>Due ({tz})</label>
+                <Input type='datetime-local' value={dueLocal} onChange={(e) => setDueLocal(e.target.value)} />
+              </div>
+            )}
+          </div>
+
+          <div className='flex items-center gap-2 pt-2'>
+            <Button onClick={save} disabled={!canSave || saving}>
+              {saving ? 'Saving…' : 'Save'}
+            </Button>
+            <Button type='button' variant='outline' onClick={() => setOpen(false)}>Close</Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
