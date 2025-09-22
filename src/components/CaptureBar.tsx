@@ -27,7 +27,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [sending, setSending] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [resultInfo, setResultInfo] = useState<string | null>(null);
+  // Removed result info banner; preview list below is sufficient
   const [text, setText] = useState('');
   const [lastSchema, setLastSchema] = useState<Schema | null>(null);
 
@@ -187,7 +187,6 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
     if (sendingRef.current) return;
     setSending(true);
     sendingRef.current = true;
-    setResultInfo(null);
     setError(null);
 
     // Ensure we have final chunks: if still recording, stop first and wait a tick
@@ -229,13 +228,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
         throw new Error(errMsg);
       }
       // res.ok true and json parsed
-      const tasks = json?.result?.tasks || [];
-      const savedCount = json?.saved?.count ?? 0;
-      if (savedCount > 0) {
-        setResultInfo(`Saved ${savedCount} task(s).`);
-      } else {
-        setResultInfo(`Transcribed. Parsed ${tasks.length} task(s).`);
-      }
+      // Keep UI minimal after processing; rely on preview and refreshed list
       setLastSchema(json?.result ?? null);
       // Future: open ReviewModal and allow user to publish tasks
     } catch (e: any) {
@@ -256,7 +249,6 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
     if (sendingRef.current) return;
     setSending(true);
     sendingRef.current = true;
-    setResultInfo(null);
     setError(null);
     setLastSchema(null);
     try {
@@ -282,13 +274,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
         const errMsg = json?.error || txt || 'Request failed';
         throw new Error(errMsg);
       }
-      const tasks = json?.result?.tasks || [];
-      const savedCount = json?.saved?.count ?? 0;
-      if (savedCount > 0) {
-        setResultInfo(`Saved ${savedCount} task(s).`);
-      } else {
-        setResultInfo(`Parsed ${tasks.length} task(s).`);
-      }
+      // Keep UI minimal after processing; rely on preview and refreshed list
       setLastSchema(json?.result ?? null);
       setText('');
     } catch (e: any) {
@@ -408,9 +394,6 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
       {/* Structured result preview */}
       {lastSchema && (
         <div className='mt-2 w-full max-w-xl rounded-md border bg-background p-3'>
-          <div className='mb-2 text-sm text-muted-foreground'>
-            Parsed for {lastSchema.timezone} on {lastSchema.date}
-          </div>
           {lastSchema.tasks?.length ? (
             <ul className='space-y-2'>
               {lastSchema.tasks.map((t, i) => (
@@ -439,7 +422,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
         <div className='text-xs text-destructive text-center'>Your browser does not support audio capture.</div>
       )}
       {error && <div className='text-xs text-destructive text-center'>{error}</div>}
-      {resultInfo && <div className='text-xs text-muted-foreground text-center'>{resultInfo}</div>}
+      {/* Hide extra banners; list + timeline update are clear enough */}
     </div>
   );
 }

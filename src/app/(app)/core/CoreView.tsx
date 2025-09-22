@@ -52,10 +52,10 @@ export function CoreView({
         <CaptureBar tz={tz} dayKey={dayKey} />
       </div>
       <div className='mb-6'>
-        <Timeline tasks={timedMemo} tz={tz} onSelect={handleSelect} />
+        <UntimedPane tasks={untimedMemo} onSelect={handleSelect} />
       </div>
       <div className='mb-6'>
-        <UntimedPane tasks={untimedMemo} onSelect={handleSelect} />
+        <Timeline tasks={timedMemo} tz={tz} onSelect={handleSelect} />
       </div>
       <div className='flex items-center gap-2'>
         <AddTaskButton />
