@@ -2,9 +2,9 @@ import { Button } from '@/components/ui/button';
 import { signOutAction } from '@/app/(auth)/auth-actions';
 import { CoreView } from './CoreView';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { userDayUtcRange } from '@/libs/tz';
+import { toUTC, userDayUtcRange } from '@/libs/tz';
 
-export default async function CorePage() {
+export default async function CorePage({ searchParams }: { searchParams?: { date?: string } }) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -13,13 +13,28 @@ export default async function CorePage() {
   const tz = userRow?.timezone || 'UTC';
 
   const nowUTC = new Date().toISOString();
-  const { startUtc, endUtc } = userDayUtcRange(nowUTC, tz);
+  const { dayKey: todayKey } = userDayUtcRange(nowUTC, tz);
+
+  // Allow date override via ?date=YYYY-MM-DD (user TZ)
+  const inputDate = searchParams?.date;
+  const isValidDate = inputDate && /^\d{4}-\d{2}-\d{2}$/.test(inputDate);
+  const dayKey = (isValidDate ? (inputDate as string) : todayKey) as string;
+
+  const startUtc = toUTC(`${dayKey}T00:00:00`, tz);
+  const endUtc = toUTC(`${dayKey}T23:59:59`, tz);
 
   // Fetch tasks in range (start_at/due_at in range OR untimed created in range)
   const or = [
-    `and(start_at.gte.${startUtc},start_at.lt.${endUtc})`,
-    `and(due_at.gte.${startUtc},due_at.lt.${endUtc})`,
-    `and(start_at.is.null,due_at.is.null,end_at.is.null,created_at.gte.${startUtc},created_at.lt.${endUtc})`,
+    // Tasks starting today in user's TZ
+    `and(start_at.gte."${startUtc}",start_at.lt."${endUtc}")`,
+    // Tasks ending today in user's TZ (covers ranges that end today)
+    `and(end_at.gte."${startUtc}",end_at.lt."${endUtc}")`,
+    // Tasks overlapping today (start before endUtc AND end after startUtc)
+    `and(start_at.lt."${endUtc}",end_at.gte."${startUtc}")`,
+    // Tasks due today
+    `and(due_at.gte."${startUtc}",due_at.lt."${endUtc}")`,
+    // Untimed tasks created today (no start/end/due)
+    `and(start_at.is.null,due_at.is.null,end_at.is.null,created_at.gte."${startUtc}",created_at.lt."${endUtc}")`,
   ].join(',');
 
   const { data: tasks = [] } = await supabase
@@ -39,7 +54,7 @@ export default async function CorePage() {
 
   return (
     <div className='container mx-auto max-w-5xl px-4 py-8'>
-      <CoreView tz={tz} timed={timed} untimed={untimed} />
+      <CoreView tz={tz} dayKey={dayKey} timed={timed} untimed={untimed} />
     </div>
   );
 }

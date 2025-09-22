@@ -19,10 +19,12 @@ export type UITask = {
 
 export function CoreView({
   tz,
+  dayKey,
   timed,
   untimed,
 }: {
   tz: string;
+  dayKey: string;
   timed: UITask[];
   untimed: UITask[];
 }) {
@@ -47,7 +49,7 @@ export function CoreView({
   return (
     <>
       <div className='mb-6'>
-        <CaptureBar />
+        <CaptureBar tz={tz} dayKey={dayKey} />
       </div>
       <div className='mb-6'>
         <Timeline tasks={timedMemo} tz={tz} onSelect={handleSelect} />
@@ -63,4 +65,3 @@ export function CoreView({
     </>
   );
 }
-

@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Mic, Send, X } from 'lucide-react';
 
-export function CaptureBar() {
+export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [supported, setSupported] = useState(true);
   const [recording, setRecording] = useState(false);
   const [sending, setSending] = useState(false);
@@ -21,6 +21,58 @@ export function CaptureBar() {
   const cancelledRef = useRef(false);
   const sendingRef = useRef(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Digital clock (HH:mm:ss) in user's TZ
+  const [now, setNow] = useState<Date>(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const nowStr = useMemo(() => {
+    try {
+      return new Intl.DateTimeFormat('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: tz,
+      }).format(now);
+    } catch {
+      return now.toLocaleTimeString();
+    }
+  }, [now, tz]);
+
+  // Date tabs (prev / today / next)
+  const toKey = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dd}`;
+  };
+  const fromKey = (key: string) => new Date(`${key}T00:00:00`);
+  const mmdd = (key: string) => `${key.slice(5, 7)}/${key.slice(8, 10)}`;
+  const todayKey = useMemo(() => {
+    const nowLocal = new Date();
+    // Best-effort: derive today in tz by using Intl to get parts
+    try {
+      const parts = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(nowLocal);
+      // en-CA gives YYYY-MM-DD
+      return parts;
+    } catch {
+      return toKey(nowLocal);
+    }
+  }, [tz]);
+  const todayDate = fromKey(todayKey);
+  const prevKey = toKey(new Date(todayDate.getTime() - 24 * 60 * 60 * 1000));
+  const nextKey = toKey(new Date(todayDate.getTime() + 24 * 60 * 60 * 1000));
+  const activeKey = dayKey;
+
+  const pushDate = (key: string) => {
+    const params = new URLSearchParams(Array.from(searchParams?.entries?.() || []));
+    params.set('date', key);
+    router.push(`/core?${params.toString()}`);
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -180,7 +232,40 @@ export function CaptureBar() {
   };
 
   return (
-    <div className='flex flex-col items-center gap-3 rounded-lg border bg-card p-5 text-card-foreground'>
+    <div className='flex flex-col items-center gap-4 rounded-lg border bg-card p-5 text-card-foreground'>
+      <div className='flex w-full flex-col items-center gap-2'>
+        <div className='font-mono text-2xl tracking-wider tabular-nums'>{nowStr}</div>
+        <div className='flex items-center justify-center gap-2'>
+          <button
+            type='button'
+            onClick={() => pushDate(prevKey)}
+            className={`rounded-md border px-3 py-1 text-center text-sm ${activeKey === prevKey ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}
+            aria-pressed={activeKey === prevKey}
+          >
+            <div className='text-[10px] text-muted-foreground'>前日</div>
+            <div className='font-medium'>{mmdd(prevKey)}</div>
+          </button>
+          <button
+            type='button'
+            onClick={() => pushDate(todayKey)}
+            className={`rounded-md border px-3 py-1 text-center text-sm ${activeKey === todayKey ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}
+            aria-pressed={activeKey === todayKey}
+          >
+            <div className='text-[10px] text-muted-foreground'>今日</div>
+            <div className='font-medium'>{mmdd(todayKey)}</div>
+          </button>
+          <button
+            type='button'
+            onClick={() => pushDate(nextKey)}
+            className={`rounded-md border px-3 py-1 text-center text-sm ${activeKey === nextKey ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}
+            aria-pressed={activeKey === nextKey}
+          >
+            <div className='text-[10px] text-muted-foreground'>明日</div>
+            <div className='font-medium'>{mmdd(nextKey)}</div>
+          </button>
+        </div>
+      </div>
+
       {sending ? (
         <>
           <div className='relative h-24 w-24'>
