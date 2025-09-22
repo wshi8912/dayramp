@@ -2,9 +2,6 @@
 const CACHE_NAME = 'dayramp-shell-v1';
 const ASSETS = [
   '/',
-  '/breathing-timer',
-  '/focus-timer',
-  '/interval-timer',
   '/privacy',
   '/terms',
   '/manifest.webmanifest',

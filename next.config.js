@@ -4,15 +4,7 @@ const nextConfig = {
     // Don't fail production builds on ESLint errors
     ignoreDuringBuilds: true,
   },
-  async redirects() {
-    return [
-      {
-        source: '/pomodoro-timer',
-        destination: '/focus-timer',
-        permanent: true, // 301 redirect for SEO
-      },
-    ];
-  },
+  // No custom redirects
 };
 
 module.exports = nextConfig;
