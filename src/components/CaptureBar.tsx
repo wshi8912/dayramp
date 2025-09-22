@@ -166,35 +166,40 @@ export function CaptureBar() {
   };
 
   return (
-    <div className='flex flex-col gap-3 rounded-lg border bg-card p-3 text-card-foreground'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
-          {!recording ? (
-            <Button aria-label='Start voice input' onClick={onStart} disabled={!supported}>
-              <Mic className='mr-2 h-4 w-4' />
-              Voice
+    <div className='flex flex-col items-center gap-3 rounded-lg border bg-card p-5 text-card-foreground'>
+      {!recording ? (
+        <>
+          <Button
+            aria-label='Start voice input'
+            onClick={onStart}
+            disabled={!supported}
+            variant='outline'
+            size='icon'
+            className='h-16 w-16 rounded-full'
+          >
+            <Mic className='h-7 w-7' />
+          </Button>
+          <div className='text-xs text-muted-foreground text-center'>Tap the mic to record</div>
+        </>
+      ) : (
+        <>
+          <div className='text-xs text-muted-foreground text-center'>{`${Math.min(elapsed, 60)}s / 60s`}</div>
+          <div className='flex items-center justify-center gap-4'>
+            <Button aria-label='Cancel' variant='ghost' onClick={onCancel}>
+              <X className='h-5 w-5' />
             </Button>
-          ) : (
-            <div className='flex items-center gap-2'>
-              <Button aria-label='Cancel' variant='ghost' onClick={onCancel}>
-                <X className='h-4 w-4' />
-              </Button>
-              <Button aria-label='Send now' onClick={onSend} disabled={sending}>
-                <Send className='mr-2 h-4 w-4' />
-                {sending ? 'Sending…' : 'Send Now'}
-              </Button>
-            </div>
-          )}
-        </div>
-        <div className='text-xs text-muted-foreground'>
-          {recording ? `${Math.min(elapsed, 60)}s / 60s` : 'Tap the mic to record'}
-        </div>
-      </div>
-      {!supported && (
-        <div className='text-xs text-destructive'>Your browser does not support audio capture.</div>
+            <Button aria-label='Send now' onClick={onSend} disabled={sending}>
+              <Send className='mr-2 h-4 w-4' />
+              {sending ? 'Sending…' : 'Send Now'}
+            </Button>
+          </div>
+        </>
       )}
-      {error && <div className='text-xs text-destructive'>{error}</div>}
-      {resultInfo && <div className='text-xs text-muted-foreground'>{resultInfo}</div>}
+      {!supported && (
+        <div className='text-xs text-destructive text-center'>Your browser does not support audio capture.</div>
+      )}
+      {error && <div className='text-xs text-destructive text-center'>{error}</div>}
+      {resultInfo && <div className='text-xs text-muted-foreground text-center'>{resultInfo}</div>}
     </div>
   );
 }
