@@ -4,6 +4,7 @@ type Task = {
   id: string;
   title: string;
   note?: string;
+  status?: string;
 };
 
 export function UntimedPane({ tasks, onSelect }: { tasks: Task[]; onSelect?: (t: Task) => void }) {
@@ -19,7 +20,14 @@ export function UntimedPane({ tasks, onSelect }: { tasks: Task[]; onSelect?: (t:
               className='w-full rounded-md border p-2 text-left hover:bg-accent'
               onClick={() => onSelect?.(t)}
             >
-              <div className='font-medium'>{t.title}</div>
+              <div className='font-medium'>
+                {t.title}
+                {t.status && (
+                  <span className='ml-2 align-middle rounded-full border px-2 py-[1px] text-[10px] uppercase text-muted-foreground'>
+                    {t.status}
+                  </span>
+                )}
+              </div>
             </button>
           ))}
         </div>

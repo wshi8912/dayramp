@@ -9,6 +9,7 @@ type Task = {
   endAt?: string;
   dueAt?: string;
   note?: string;
+  status?: string;
 };
 
 export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; onSelect?: (t: Task) => void }) {
@@ -28,7 +29,14 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                 className={`rounded-md border p-2 text-left hover:bg-accent ${isDueOnly ? 'opacity-90' : ''}`}
                 onClick={() => onSelect?.(t)}
               >
-                <div className={`font-medium ${isDueOnly ? 'text-sm' : ''}`}>{t.title}</div>
+                <div className={`font-medium ${isDueOnly ? 'text-sm' : ''}`}>
+                  {t.title}
+                  {t.status && (
+                    <span className='ml-2 align-middle rounded-full border px-2 py-[1px] text-[10px] uppercase text-muted-foreground'>
+                      {t.status}
+                    </span>
+                  )}
+                </div>
                 <div className='text-xs text-muted-foreground'>
                   {t.startAt && t.endAt
                     ? `${fmt(t.startAt)} → ${fmt(t.endAt)}`
