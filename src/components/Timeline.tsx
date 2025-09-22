@@ -14,51 +14,76 @@ type Task = {
 
 export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; onSelect?: (t: Task) => void }) {
   const fmt = (iso?: string) => (iso ? fromUTC(iso, tz).localISO.replace('T', ' ') : '');
+  const timeKey = (t: Task) => t.startAt || t.dueAt || '';
+  const sorted = [...tasks].sort((a, b) => {
+    const ta = timeKey(a);
+    const tb = timeKey(b);
+    if (!ta && !tb) return 0;
+    if (!ta) return 1;
+    if (!tb) return -1;
+    return new Date(ta).getTime() - new Date(tb).getTime();
+  });
+
   return (
     <div className='rounded-lg border bg-card p-3 text-card-foreground'>
-      <div className='mb-1 text-xs text-muted-foreground'>Timeline</div>
-      <div className='grid grid-cols-1 gap-1.5 md:grid-cols-2'>
-        {tasks.length === 0 ? (
-          <div className='text-sm text-muted-foreground'>No timed tasks yet.</div>
-        ) : (
-          tasks.map((t) => {
-            const isDueOnly = !!t.dueAt && !t.startAt && !t.endAt;
-            const timeStr = t.startAt && t.endAt
-              ? `${fmt(t.startAt)} → ${fmt(t.endAt)}`
-              : t.startAt
-              ? fmt(t.startAt)
-              : t.dueAt
-              ? `due ${fmt(t.dueAt)}`
-              : '';
-            return (
-              <button
-                key={t.id}
-                className={`rounded-md border p-2 text-left hover:bg-accent/50 hover:border-accent transition-colors ${isDueOnly ? 'opacity-90' : ''}`}
-                onClick={() => onSelect?.(t)}
-              >
-                <div className='flex items-center justify-between gap-2'>
-                  <div className={`truncate font-medium leading-tight ${isDueOnly ? 'text-sm' : ''}`}>
-                    <span className='truncate'>{t.title}</span>
-                    {t.status && (
-                      <span className='ml-2 align-middle rounded-full bg-accent px-1.5 py-[1px] text-[10px] uppercase text-accent-foreground'>
-                        {t.status}
-                      </span>
-                    )}
-                  </div>
-                  {timeStr && (
-                    <div className='shrink-0 text-[11px] text-muted-foreground font-mono tabular-nums'>
-                      {timeStr}
+      <div className='mb-2 text-xs text-muted-foreground'>Timeline</div>
+
+      {sorted.length === 0 ? (
+        <div className='text-sm text-muted-foreground'>No timed tasks yet.</div>
+      ) : (
+        <div className='relative'>
+          {/* vertical rail */}
+          <div className='pointer-events-none absolute left-4 top-0 bottom-0 w-0.5 bg-border' />
+
+          <ul className='space-y-3'>
+            {sorted.map((t, idx) => {
+              const isDueOnly = !!t.dueAt && !t.startAt && !t.endAt;
+              const timeStr = t.startAt && t.endAt
+                ? `${fmt(t.startAt)} → ${fmt(t.endAt)}`
+                : t.startAt
+                ? fmt(t.startAt)
+                : t.dueAt
+                ? `due ${fmt(t.dueAt)}`
+                : '';
+
+              const dotColor = t.status === 'done'
+                ? 'bg-muted-foreground'
+                : isDueOnly
+                ? 'bg-amber-500'
+                : 'bg-primary';
+
+              return (
+                <li key={t.id} className='relative pl-12'>
+                  {/* dot */}
+                  <span className={`absolute left-3 top-1.5 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dotColor}`} />
+
+                  <button
+                    className={`w-full rounded-md border p-2 text-left transition-colors hover:border-accent hover:bg-accent/50 ${isDueOnly ? 'opacity-90' : ''}`}
+                    onClick={() => onSelect?.(t)}
+                  >
+                    <div className='flex items-center justify-between gap-2'>
+                      <div className={`truncate font-medium leading-tight ${isDueOnly ? 'text-sm' : ''}`}>
+                        <span className='truncate'>{t.title}</span>
+                        {t.status && (
+                          <span className='ml-2 align-middle rounded-full bg-accent px-1.5 py-[1px] text-[10px] uppercase text-accent-foreground'>
+                            {t.status}
+                          </span>
+                        )}
+                      </div>
+                      {timeStr && (
+                        <div className='shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground'>
+                          {timeStr}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                {t.note && (
-                  <div className='mt-1 truncate text-xs text-muted-foreground'>{t.note}</div>
-                )}
-              </button>
-            );
-          })
-        )}
-      </div>
+                    {t.note && <div className='mt-1 truncate text-xs text-muted-foreground'>{t.note}</div>}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
