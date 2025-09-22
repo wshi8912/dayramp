@@ -15,6 +15,7 @@ export type UITask = {
   startAt?: string;
   endAt?: string;
   dueAt?: string;
+  status?: string;
 };
 
 export function CoreView({

@@ -14,6 +14,7 @@ type UITask = {
   startAt?: string;
   endAt?: string;
   dueAt?: string;
+  status?: string;
 };
 
 type TimeType = 'none' | 'range' | 'deadline';
@@ -42,6 +43,7 @@ export function TaskSheet({
   const [title, setTitle] = useState(task?.title || '');
   const [note, setNote] = useState(task?.note || '');
   const [timeType, setTimeType] = useState<TimeType>(initialType);
+  const [status, setStatus] = useState<string>(task?.status || 'todo');
   const [startLocal, setStartLocal] = useState('');
   const [endLocal, setEndLocal] = useState('');
   const [dueLocal, setDueLocal] = useState('');
@@ -51,6 +53,7 @@ export function TaskSheet({
     setTitle(task?.title || '');
     setNote(task?.note || '');
     setTimeType(initialType);
+    setStatus(task?.status || 'todo');
     setStartLocal(task?.startAt ? fromUTC(task.startAt, tz).localISO : '');
     setEndLocal(task?.endAt ? fromUTC(task.endAt, tz).localISO : '');
     setDueLocal(task?.dueAt ? fromUTC(task.dueAt, tz).localISO : '');
@@ -65,6 +68,7 @@ export function TaskSheet({
       const payload: Record<string, any> = {
         title: title.trim(),
         note: note.trim() || null,
+        status: status || 'todo',
       };
       if (timeType === 'none') {
         payload.startAt = null;
@@ -148,6 +152,14 @@ export function TaskSheet({
                   <Input type='datetime-local' value={dueLocal} onChange={(e) => setDueLocal(e.target.value)} />
                 </div>
               )}
+            </div>
+
+            <div className='flex flex-col gap-2'>
+              <label className='text-sm'>Status</label>
+              <div className='flex gap-2'>
+                <Button type='button' variant={status === 'todo' ? 'default' : 'outline'} onClick={() => setStatus('todo')}>Todo</Button>
+                <Button type='button' variant={status === 'done' ? 'default' : 'outline'} onClick={() => setStatus('done')}>Done</Button>
+              </div>
             </div>
 
             <div className='flex items-center gap-2 pt-2'>

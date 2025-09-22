@@ -58,10 +58,10 @@ export default async function CorePage({ searchParams }: { searchParams?: { date
   // Map DB -> UI props
   const timed = (tasks || [])
     .filter((t: any) => t.start_at || t.end_at || t.due_at)
-    .map((t: any) => ({ id: t.id, title: t.title, note: t.note ?? undefined, startAt: t.start_at ?? undefined, endAt: t.end_at ?? undefined, dueAt: t.due_at ?? undefined }));
+    .map((t: any) => ({ id: t.id, title: t.title, note: t.note ?? undefined, startAt: t.start_at ?? undefined, endAt: t.end_at ?? undefined, dueAt: t.due_at ?? undefined, status: t.status }));
   // Map separate pinned untimed list (regardless of created date)
   const untimed = (untimedAll || [])
-    .map((t: any) => ({ id: t.id, title: t.title, note: t.note ?? undefined }));
+    .map((t: any) => ({ id: t.id, title: t.title, note: t.note ?? undefined, status: t.status }));
 
   return (
     <div className='container mx-auto max-w-5xl px-4 py-8'>
