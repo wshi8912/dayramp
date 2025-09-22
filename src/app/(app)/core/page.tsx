@@ -52,7 +52,6 @@ export default async function CorePage({ searchParams }: { searchParams?: { date
     .is('start_at', null)
     .is('end_at', null)
     .is('due_at', null)
-    .neq('status', 'done')
     .order('created_at', { ascending: false });
 
   // Map DB -> UI props
