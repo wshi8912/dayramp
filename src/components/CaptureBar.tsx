@@ -5,6 +5,22 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Mic, Send, X } from 'lucide-react';
 
+type SchemaTask = {
+  title: string;
+  note?: string;
+  time: { type: 'range' | 'deadline' | 'none'; startLocal?: string; endLocal?: string; dueLocal?: string };
+  estimateMin?: number;
+  priority?: 'low' | 'mid' | 'high';
+  confidence?: number;
+};
+
+type Schema = {
+  date: string;
+  timezone: string;
+  language: 'ja' | 'en';
+  tasks: SchemaTask[];
+};
+
 export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [supported, setSupported] = useState(true);
   const [recording, setRecording] = useState(false);
@@ -12,6 +28,8 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [resultInfo, setResultInfo] = useState<string | null>(null);
+  const [text, setText] = useState('');
+  const [lastSchema, setLastSchema] = useState<Schema | null>(null);
 
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -187,11 +205,11 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
         return;
       }
       const form = new FormData();
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
       form.append('file', blob, 'capture.webm');
       form.append('language', 'auto');
       form.append('timezone', tz);
       form.append('save', 'true');
+      form.append('date', dayKey);
 
       const res = await fetch('/api/capture', {
         method: 'POST',
@@ -218,6 +236,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
       } else {
         setResultInfo(`Transcribed. Parsed ${tasks.length} task(s).`);
       }
+      setLastSchema(json?.result ?? null);
       // Future: open ReviewModal and allow user to publish tasks
     } catch (e: any) {
       console.error('Capture send error:', e);
@@ -227,6 +246,57 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
       sendingRef.current = false;
       // Reset chunks so a new recording can start fresh
       chunksRef.current = [];
+      router.refresh();
+    }
+  };
+
+  const onSendText = async () => {
+    const content = text.trim();
+    if (!content) return;
+    if (sendingRef.current) return;
+    setSending(true);
+    sendingRef.current = true;
+    setResultInfo(null);
+    setError(null);
+    setLastSchema(null);
+    try {
+      const form = new FormData();
+      form.append('text', content);
+      form.append('language', 'auto');
+      form.append('timezone', tz);
+      form.append('date', dayKey);
+      form.append('save', 'true');
+
+      const res = await fetch('/api/capture', {
+        method: 'POST',
+        body: form,
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      const txt = await res.text();
+      let json: any = null;
+      try {
+        json = txt ? JSON.parse(txt) : null;
+      } catch {}
+      if (!res.ok) {
+        const errMsg = json?.error || txt || 'Request failed';
+        throw new Error(errMsg);
+      }
+      const tasks = json?.result?.tasks || [];
+      const savedCount = json?.saved?.count ?? 0;
+      if (savedCount > 0) {
+        setResultInfo(`Saved ${savedCount} task(s).`);
+      } else {
+        setResultInfo(`Parsed ${tasks.length} task(s).`);
+      }
+      setLastSchema(json?.result ?? null);
+      setText('');
+    } catch (e: any) {
+      console.error('Capture text send error:', e);
+      setError(e?.message || 'Failed to send');
+    } finally {
+      setSending(false);
+      sendingRef.current = false;
       router.refresh();
     }
   };
@@ -304,6 +374,66 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
             </Button>
           </div>
         </>
+      )}
+      {/* Text input below mic */}
+      <div className='mt-2 w-full max-w-xl'>
+        <label htmlFor='quick-text' className='mb-1 block text-xs text-muted-foreground'>
+          Type a task or short brief (Ctrl+Enter to send)
+        </label>
+        <textarea
+          id='quick-text'
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+              e.preventDefault();
+              onSendText();
+            }
+          }}
+          rows={3}
+          placeholder='e.g. 14:00-14:30 meeting with design; submit report by 18:00'
+          className='w-full resize-y rounded-md border bg-background p-2 text-sm outline-none focus:ring-1 focus:ring-ring'
+          disabled={sending}
+        />
+        <div className='mt-2 flex items-center justify-end gap-2'>
+          <Button variant='secondary' type='button' onClick={() => setText('')} disabled={sending || !text.trim()}>
+            Clear
+          </Button>
+          <Button type='button' onClick={onSendText} disabled={sending || !text.trim()}>
+            <Send className='mr-2 h-4 w-4' /> Send Text
+          </Button>
+        </div>
+      </div>
+
+      {/* Structured result preview */}
+      {lastSchema && (
+        <div className='mt-2 w-full max-w-xl rounded-md border bg-background p-3'>
+          <div className='mb-2 text-sm text-muted-foreground'>
+            Parsed for {lastSchema.timezone} on {lastSchema.date}
+          </div>
+          {lastSchema.tasks?.length ? (
+            <ul className='space-y-2'>
+              {lastSchema.tasks.map((t, i) => (
+                <li key={i} className='rounded-md border p-2'>
+                  <div className='font-medium'>{t.title}</div>
+                  <div className='text-xs text-muted-foreground'>
+                    {t.time?.type === 'range' && (t.time.startLocal || t.time.endLocal)
+                      ? `${t.time.startLocal || ''}${t.time.startLocal || t.time.endLocal ? ' → ' : ''}${t.time.endLocal || ''}`
+                      : t.time?.type === 'deadline' && t.time.dueLocal
+                      ? `due ${t.time.dueLocal}`
+                      : 'no time'}
+                    {t.estimateMin ? ` • est ${t.estimateMin}m` : ''}
+                    {t.priority ? ` • ${t.priority}` : ''}
+                    {typeof t.confidence === 'number' ? ` • conf ${Math.round(t.confidence * 100)}%` : ''}
+                  </div>
+                  {t.note && <div className='mt-1 text-xs'>{t.note}</div>}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className='text-sm text-muted-foreground'>No tasks parsed.</div>
+          )}
+        </div>
       )}
       {!supported && (
         <div className='text-xs text-destructive text-center'>Your browser does not support audio capture.</div>
