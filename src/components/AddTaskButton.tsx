@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { postJSON } from '@/libs/api';
 import { useRouter } from 'next/navigation';
 import { toUTC } from '@/libs/tz';
+import { Plus } from 'lucide-react';
 
 type TimeType = 'none' | 'range' | 'deadline';
 
@@ -70,7 +71,14 @@ export function AddTaskButton({ tz }: { tz: string }) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
       <DialogTrigger asChild>
-        <Button variant='default'>Add Task</Button>
+        <Button
+          variant='default'
+          size='icon'
+          aria-label='Add Task'
+          className='fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg'
+        >
+          <Plus className='h-7 w-7' />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

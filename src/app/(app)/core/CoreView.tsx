@@ -57,10 +57,7 @@ export function CoreView({
       <div className='mb-6'>
         <Timeline tasks={timedMemo} tz={tz} onSelect={handleSelect} />
       </div>
-      <div className='flex items-center gap-2'>
-        <AddTaskButton tz={tz} />
-        <div className='text-sm text-muted-foreground'>Search coming soon</div>
-      </div>
+      <AddTaskButton tz={tz} />
       <TaskSheet open={open} onOpenChange={setOpen} task={selected ?? undefined} tz={tz} onSaved={refreshAndClose} />
     </>
   );

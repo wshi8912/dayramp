@@ -44,12 +44,23 @@ export default async function CorePage({ searchParams }: { searchParams?: { date
     .or(or)
     .order('created_at', { ascending: false });
 
+  // Pinned tasks at top: unscheduled (no start/end/due), not completed
+  const { data: untimedAll = [] } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('user_id', user?.id || '')
+    .is('start_at', null)
+    .is('end_at', null)
+    .is('due_at', null)
+    .neq('status', 'done')
+    .order('created_at', { ascending: false });
+
   // Map DB -> UI props
   const timed = (tasks || [])
     .filter((t: any) => t.start_at || t.end_at || t.due_at)
     .map((t: any) => ({ id: t.id, title: t.title, note: t.note ?? undefined, startAt: t.start_at ?? undefined, endAt: t.end_at ?? undefined, dueAt: t.due_at ?? undefined }));
-  const untimed = (tasks || [])
-    .filter((t: any) => !t.start_at && !t.end_at && !t.due_at)
+  // Map separate pinned untimed list (regardless of created date)
+  const untimed = (untimedAll || [])
     .map((t: any) => ({ id: t.id, title: t.title, note: t.note ?? undefined }));
 
   return (
