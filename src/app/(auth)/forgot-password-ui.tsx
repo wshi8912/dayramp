@@ -49,7 +49,7 @@ export function ForgotPasswordUI({
     <section className='mx-auto mt-16 w-full max-w-md px-4'>
       <Card className='text-center rounded-2xl border bg-card text-foreground backdrop-blur'>
         <CardHeader>
-          <Image src='/icon-72x72.png' width={50} height={50} alt='DayKickOff' className='m-auto' />
+          <Image src='/icon-72x72.png' width={50} height={50} alt='DayRamp' className='m-auto' />
           <CardTitle className='text-lg text-foreground'>Reset Password</CardTitle>
           <CardDescription className='text-muted-foreground'>
             We'll send you a link to reset your password

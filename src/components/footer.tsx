@@ -25,7 +25,7 @@ export function Footer() {
           </Link>
         </nav>
         <div className='text-center text-xs text-muted-foreground sm:text-right mt-4'>
-          © {new Date().getFullYear()} DayKickOff
+          © {new Date().getFullYear()} DayRamp
         </div>
       </div>
     </footer>

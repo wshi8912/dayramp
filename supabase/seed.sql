@@ -1,4 +1,4 @@
--- Supabase Seed Data for DayKickOff Development
+-- Supabase Seed Data for DayRamp Development
 -- This file is automatically run when using `supabase db reset`
 
 -- Create test user for development

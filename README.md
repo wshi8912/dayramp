@@ -1,4 +1,4 @@
-# DayKickOff
+# DayRamp
 
 Start your day with focus and productivity - タスク管理と生産性向上のためのSaaSアプリケーション
 
@@ -108,7 +108,7 @@ npm run stripe:listen  # Stripe Webhook リスナー起動
 - **description**: 変更内容の説明（例: add_user_table）
 
 ### 例
-- `20250830_001_daykickoff_init.sql` - 初期セットアップ
+- `20250830_001_dayramp_init.sql` - 初期セットアップ
 - `20250830_002_add_analytics_table.sql` - 分析テーブル追加
 
 ## 🔧 環境変数
@@ -187,10 +187,10 @@ Git worktreeを使用すると、同じリポジトリから複数のブラン�
 
 ```bash
 # 新しいブランチで新しいworktreeを作成
-git worktree add ../daykickoff-feature-a -b feature-a
+git worktree add ../dayramp-feature-a -b feature-a
 
 # または既存のブランチでworktreeを作成
-git worktree add ../daykickoff-bugfix bugfix-123
+git worktree add ../dayramp-bugfix bugfix-123
 ```
 
 これにより、リポジトリの独立した作業コピーを持つ新しいディレクトリが作成されます。
@@ -199,7 +199,7 @@ git worktree add ../daykickoff-bugfix bugfix-123
 
 ```bash
 # worktreeに移動
-cd ../daykickoff-feature-a
+cd ../dayramp-feature-a
 
 # この独立した環境でClaude Codeを実行
 claude
@@ -208,7 +208,7 @@ claude
 #### 3. 別のworktreeでClaudeを実行
 
 ```bash
-cd ../daykickoff-bugfix
+cd ../dayramp-bugfix
 claude
 ```
 
@@ -219,7 +219,7 @@ claude
 git worktree list
 
 # 作業完了後にworktreeを削除
-git worktree remove ../daykickoff-feature-a
+git worktree remove ../dayramp-feature-a
 ```
 
 ### メリット

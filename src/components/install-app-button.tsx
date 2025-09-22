@@ -19,7 +19,7 @@ type BeforeInstallPromptEvent = Event & {
   userChoice?: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
 
-const DISMISSED_KEY = 'daykickoff:a2hs-dismissed';
+const DISMISSED_KEY = 'dayramp:a2hs-dismissed';
 
 function isIOS() {
   if (typeof navigator === 'undefined') return false;
@@ -100,9 +100,9 @@ export function InstallAppButton() {
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent className='border-white/20 bg-white/10 text-white backdrop-blur'>
           <AlertDialogHeader>
-            <AlertDialogTitle>Install DayKickOff</AlertDialogTitle>
+            <AlertDialogTitle>Install DayRamp</AlertDialogTitle>
             <AlertDialogDescription className='text-white/80'>
-              Add DayKickOff to your home screen for quick access and a full-screen experience.
+              Add DayRamp to your home screen for quick access and a full-screen experience.
               {isIOS() ? (
                 <>
                   <br />On iOS, use Safari: Share → Add to Home Screen.

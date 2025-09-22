@@ -1,8 +1,8 @@
-# DayKickOff - Timer Features Documentation
+# DayRamp - Timer Features Documentation
 
 ## Overview
 
-DayKickOff provides specialized productivity tools designed to enhance focus, wellness, and task management. Each feature offers a unique set of capabilities tailored to specific use cases while sharing common functionality for an optimal user experience.
+DayRamp provides specialized productivity tools designed to enhance focus, wellness, and task management. Each feature offers a unique set of capabilities tailored to specific use cases while sharing common functionality for an optimal user experience.
 
 ### Common Capabilities
 - **Custom Sound Effects**: Configurable audio cues for different phases and transitions
@@ -292,8 +292,8 @@ The Interval Timer is designed for high-intensity interval training (HIIT), supp
 
 ## Support
 
-For issues, feature requests, or contributions, please visit the [DayKickOff GitHub repository](https://github.com/your-repo/daykickoff).
+For issues, feature requests, or contributions, please visit the [DayRamp GitHub repository](https://github.com/your-repo/dayramp).
 
 ## License
 
-DayKickOff is open-source software. See LICENSE file for details.
+DayRamp is open-source software. See LICENSE file for details.

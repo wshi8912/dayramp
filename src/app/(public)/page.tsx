@@ -14,7 +14,7 @@ export default function HomePage() {
       </Suspense>
       <div className='relative mx-auto flex w-full max-w-[1000px] flex-col gap-10 px-4 pt-20 lg:gap-14 text-foreground'>
         <section className='flex flex-col items-center gap-3 text-center'>
-          <h1 className='text-3xl font-semibold'>DayKickOff</h1>
+          <h1 className='text-3xl font-semibold'>DayRamp</h1>
           <p className='max-w-xl text-sm text-muted-foreground'>Start your day with focus and productivity.</p>
         </section>
 

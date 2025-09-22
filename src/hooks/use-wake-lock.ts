@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 type WakeLockSentinel = any; // Navigator wakeLock is not in TS lib yet
 
-const STORAGE_KEY = 'daykickoff:wake:enabled';
+const STORAGE_KEY = 'dayramp:wake:enabled';
 
 export function useWakeLock() {
   const [supported, setSupported] = useState(false);

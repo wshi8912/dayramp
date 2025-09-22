@@ -10,9 +10,9 @@ export function Logo() {
         height={32}
         priority
         quality={100}
-        alt='DayKickOff logo mark'
+        alt='DayRamp logo mark'
       />
-      <span className='font-alt text-xl'>DayKickOff</span>
+      <span className='font-alt text-xl'>DayRamp</span>
     </Link>
   );
 }

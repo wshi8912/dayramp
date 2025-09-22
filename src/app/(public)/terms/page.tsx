@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms and Conditions | DayKickOff',
-  description: 'Terms and conditions for using DayKickOff',
+  title: 'Terms and Conditions | DayRamp',
+  description: 'Terms and conditions for using DayRamp',
 };
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
         <div>
           <h2 className='text-xl font-medium mb-3'>Acceptance of Terms</h2>
           <p className='text-sm leading-relaxed'>
-            By using DayKickOff, you agree to these Terms and Conditions.
+            By using DayRamp, you agree to these Terms and Conditions.
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export default function TermsPage() {
         <div>
           <h2 className='text-xl font-medium mb-3'>Use of Service</h2>
           <ul className='list-disc list-inside text-sm space-y-1 ml-2'>
-            <li>Use DayKickOff for personal, non-commercial purposes only</li>
+            <li>Use DayRamp for personal, non-commercial purposes only</li>
             <li>Do not reverse-engineer or modify the service</li>
             <li>Do not use for any illegal activities</li>
           </ul>

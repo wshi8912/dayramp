@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | DayKickOff',
-  description: 'Privacy policy for DayKickOff - How we collect and use your data',
+  title: 'Privacy Policy | DayRamp',
+  description: 'Privacy policy for DayRamp - How we collect and use your data',
 };
 
 export default function PrivacyPage() {

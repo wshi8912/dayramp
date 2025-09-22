@@ -1,6 +1,6 @@
 {
-  "name": "DayKickOff",
-  "short_name": "DayKickOff",
+  "name": "DayRamp",
+  "short_name": "DayRamp",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

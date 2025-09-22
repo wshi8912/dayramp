@@ -24,7 +24,7 @@ const montserratAlternates = Montserrat_Alternates({
 });
 
 export const metadata: Metadata = {
-  title: 'DayKickOff',
+  title: 'DayRamp',
   description: 'Start your day with focus and productivity',
   manifest: '/manifest.webmanifest',
 };

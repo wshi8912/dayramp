@@ -1,5 +1,5 @@
 // Minimal service worker: keeps shell available when cached
-const CACHE_NAME = 'daykickoff-shell-v1';
+const CACHE_NAME = 'dayramp-shell-v1';
 const ASSETS = [
   '/',
   '/breathing-timer',

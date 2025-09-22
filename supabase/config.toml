@@ -2,7 +2,7 @@
 # https://supabase.com/docs/guides/local-development/cli/config
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
-project_id = "daykickoff"
+project_id = "dayramp"
 
 [api]
 enabled = true
@@ -144,21 +144,21 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Custom email templates for DayKickOff
+# Custom email templates for DayRamp
 [auth.email.template.invite]
-subject = "You're invited to DayKickOff"
+subject = "You're invited to DayRamp"
 content_path = "./supabase/templates/invite.html"
 
 [auth.email.template.confirmation]
-subject = "Confirm your DayKickOff account"
+subject = "Confirm your DayRamp account"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.recovery]
-subject = "Reset your DayKickOff password"
+subject = "Reset your DayRamp password"
 content_path = "./supabase/templates/recovery.html"
 
 [auth.email.template.email_change]
-subject = "Confirm your DayKickOff email change"
+subject = "Confirm your DayRamp email change"
 content_path = "./supabase/templates/email_change.html"
 
 [auth.sms]
