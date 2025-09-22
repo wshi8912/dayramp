@@ -41,13 +41,16 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Digital clock (HH:mm:ss) in user's TZ
-  const [now, setNow] = useState<Date>(() => new Date());
+  // Digital clock (HH:mm:ss) in user's TZ — avoid SSR mismatch
+  const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
+    const tick = () => setNow(new Date());
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
   const nowStr = useMemo(() => {
+    if (!now) return '';
     try {
       return new Intl.DateTimeFormat('en-US', {
         hour12: false,
@@ -290,7 +293,9 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   return (
     <div className='flex flex-col items-center gap-4 rounded-lg border bg-card p-5 text-card-foreground'>
       <div className='flex w-full flex-col items-center gap-2'>
-        <div className='font-mono text-2xl tracking-wider tabular-nums'>{nowStr}</div>
+        <div className='font-mono text-2xl tracking-wider tabular-nums' suppressHydrationWarning>
+          {nowStr || '— — : — — : — —'}
+        </div>
         <div className='flex items-center justify-center gap-2'>
           <button
             type='button'
