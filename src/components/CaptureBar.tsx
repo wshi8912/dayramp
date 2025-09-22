@@ -18,6 +18,8 @@ export function CaptureBar() {
   const chunksRef = useRef<BlobPart[]>([]);
   const timerRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const cancelledRef = useRef(false);
+  const sendingRef = useRef(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -85,6 +87,15 @@ export function CaptureBar() {
         mediaStreamRef.current = null;
         setRecording(false);
         clearTimer();
+        // Auto-send when recording stops (unless user cancelled)
+        if (!cancelledRef.current && !sendingRef.current) {
+          // slight delay to ensure chunks are flushed
+          setTimeout(() => {
+            void onSend();
+          }, 50);
+        } else {
+          cancelledRef.current = false;
+        }
       };
       rec.start();
       setRecording(true);
@@ -98,12 +109,14 @@ export function CaptureBar() {
   const onCancel = () => {
     // Discard recording and reset
     chunksRef.current = [];
+    cancelledRef.current = true;
     stopAll();
   };
 
   const onSend = async () => {
-    if (sending) return;
+    if (sendingRef.current) return;
     setSending(true);
+    sendingRef.current = true;
     setResultInfo(null);
     setError(null);
 
@@ -159,6 +172,7 @@ export function CaptureBar() {
       setError(e?.message || 'Failed to send');
     } finally {
       setSending(false);
+      sendingRef.current = false;
       // Reset chunks so a new recording can start fresh
       chunksRef.current = [];
       router.refresh();
@@ -167,7 +181,18 @@ export function CaptureBar() {
 
   return (
     <div className='flex flex-col items-center gap-3 rounded-lg border bg-card p-5 text-card-foreground'>
-      {!recording ? (
+      {sending ? (
+        <>
+          <div className='relative h-24 w-24'>
+            <div className='absolute inset-0 rounded-full border-2 border-primary animate-ping' />
+            <div className='absolute inset-2 rounded-full border-2 border-primary/50 animate-pulse' />
+            <div className='absolute inset-4 flex items-center justify-center rounded-full bg-primary/10'>
+              <div className='h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+            </div>
+          </div>
+          <div className='text-xs text-muted-foreground text-center'>Processing audio…</div>
+        </>
+      ) : !recording ? (
         <>
           <Button
             aria-label='Start voice input'
