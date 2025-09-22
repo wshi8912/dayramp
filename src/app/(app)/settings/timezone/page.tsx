@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { TimezoneForm } from '@/components/settings/TimezoneForm';
+import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,13 +29,17 @@ const fallbackTimezones = [
 export default async function TimezonePage() {
   const { timezone } = await getUserTimezone();
 
-  async function updateTimezoneAction(formData: FormData) {
+  async function updateTimezoneAction(_prevState: any, formData: FormData) {
     'use server';
     const tz = String(formData.get('timezone') || 'UTC');
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) return { ok: false, error: 'Unauthorized' };
     await supabase.from('users').update({ timezone: tz }).eq('id', user.id);
+    // Revalidate relevant pages
+    revalidatePath('/core');
+    revalidatePath('/settings/timezone');
+    return { ok: true, timezone: tz };
   }
 
   return (
