@@ -256,22 +256,24 @@ export function TimelineGrid({
                     role='button'
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); onSelect?.(t); }}
-                    className={`relative cursor-pointer p-2 shadow-sm transition-colors hover:bg-accent/30 ${isDueOnly ? 'opacity-90' : ''}`}
+                    className={`relative cursor-pointer ${density === 'compact' ? 'p-1' : 'p-2'} shadow-sm transition-colors hover:bg-accent/30 ${isDueOnly ? 'opacity-90' : ''}`}
                     style={{ height }}
                   >
                     {/* leading dot */}
                     <span className={`absolute left-1 top-1 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dotColor}`} />
                     <div className='ml-4 flex items-center justify-between gap-2'>
-                      <div className={`min-w-0 truncate font-medium leading-tight ${isDueOnly ? 'text-sm' : ''}`}>
+                      <div className={`min-w-0 truncate font-medium leading-tight ${density === 'compact' ? 'text-xs' : ''} ${isDueOnly && density !== 'compact' ? 'text-sm' : ''}`}>
                         <span className='truncate'>{t.title}</span>
-                        {t.status && (
+                        {density !== 'compact' && t.status && (
                           <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
                             {t.status}
                           </Badge>
                         )}
                       </div>
                     </div>
-                    {t.note && <div className='mt-1 truncate text-xs text-muted-foreground ml-4'>{t.note}</div>}
+                    {density !== 'compact' && t.note && (
+                      <div className='mt-1 truncate text-xs text-muted-foreground ml-4'>{t.note}</div>
+                    )}
                   </Card>
                 </div>
               );

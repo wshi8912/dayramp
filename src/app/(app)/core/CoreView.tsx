@@ -51,7 +51,9 @@ export function CoreView({
   const timedMemo = useMemo(() => timed, [timed]);
   const untimedMemo = useMemo(() => untimed, [untimed]);
   const useGrid = (searchParams?.get?.('grid') || '') === '1';
-  const denseMode = (searchParams?.get?.('dense') || '') === '1';
+  // Default to compact when param is missing
+  const denseParam = searchParams?.get?.('dense');
+  const denseMode = (denseParam == null ? '1' : denseParam) === '1';
 
   const pushWithParam = (key: string, value: string | null) => {
     const params = new URLSearchParams(Array.from(searchParams?.entries?.() || []));
