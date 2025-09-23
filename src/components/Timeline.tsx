@@ -33,6 +33,54 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
     return h < 24 ? `${String(h).padStart(2, '0')}:00` : '24:00';
   });
 
+  // Helpers for overlap grouping (in local TZ minutes)
+  const toMinutes = (iso?: string) => {
+    if (!iso) return null;
+    const s = fromUTC(iso, tz).localISO.slice(11, 16); // HH:MM
+    const hh = Number(s.slice(0, 2));
+    const mm = Number(s.slice(3, 5));
+    return hh * 60 + mm;
+  };
+
+  type TWithSpan = {
+    task: Task;
+    startMin: number; // minutes since 00:00
+    endMin: number; // inclusive end minute (fallback to startMin)
+    label: string; // left label (start or due)
+    isDueOnly: boolean;
+  };
+
+  const withSpans: TWithSpan[] = sorted
+    .map((t) => {
+      const hasStart = !!t.startAt;
+      const hasEnd = !!t.endAt;
+      const hasDue = !!t.dueAt;
+      const startMin = hasStart ? toMinutes(t.startAt)! : hasDue ? toMinutes(t.dueAt)! : 0;
+      const endMin = hasStart && hasEnd ? toMinutes(t.endAt)! : startMin;
+      const isDueOnly = hasDue && !hasStart && !hasEnd;
+      const label = hasStart ? fmtHM(t.startAt) : hasDue ? `due ${fmtHM(t.dueAt)}` : '';
+      return { task: t, startMin, endMin, label, isDueOnly };
+    })
+    // guard against any items that couldn't be parsed
+    .filter((x) => Number.isFinite(x.startMin) && Number.isFinite(x.endMin));
+
+  // Group consecutive items that overlap in time.
+  // Assumes input is sorted by start time (or due time fallback)
+  const groups: TWithSpan[][] = [];
+  for (const item of withSpans) {
+    const g = groups[groups.length - 1];
+    if (!g) {
+      groups.push([item]);
+      continue;
+    }
+    const currentGroupEnd = Math.max(...g.map((x) => x.endMin));
+    if (item.startMin <= currentGroupEnd) {
+      g.push(item);
+    } else {
+      groups.push([item]);
+    }
+  }
+
   return (
     <div className='rounded-lg border bg-card p-3 text-card-foreground'>
       <div className='mb-2 text-xs text-muted-foreground'>Timeline</div>
@@ -61,55 +109,68 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
             {/* vertical rail aligned with dots (after 4rem label = left-20) */}
             <div className='pointer-events-none absolute left-20 top-0 bottom-0 w-0.5 bg-border' />
 
-            <ul className='space-y-3'>
-              {sorted.map((t) => {
-                const isDueOnly = !!t.dueAt && !t.startAt && !t.endAt;
-                const leftLabel = t.startAt
-                  ? fmtHM(t.startAt)
-                  : t.dueAt
-                  ? `due ${fmtHM(t.dueAt)}`
-                  : '';
-
-                const dotColor = t.status === 'done'
+            <ul>
+              {groups.map((g, gi) => {
+                const first = g[0];
+                const leftLabel = first.label;
+                const anyDueOnly = g.every((x) => x.isDueOnly);
+                // choose dot color by first task (keeps semantics close to original)
+                const dotColor = first.task.status === 'done'
                   ? 'bg-muted-foreground'
-                  : isDueOnly
+                  : first.isDueOnly
                   ? 'bg-amber-500'
                   : 'bg-primary';
 
                 return (
-                  <li key={t.id} className='relative pl-28'>
-                    {/* left time label per task */}
+                  <li key={`grp-${gi}`} className='relative mb-3 pl-28'>
+                    {/* left time label per overlapping group */}
                     {leftLabel && (
                       <span className='absolute left-0 top-1.5 w-16 pr-2 text-right font-mono text-[11px] tabular-nums text-muted-foreground'>
                         {leftLabel}
                       </span>
                     )}
-                    {/* dot */}
+                    {/* dot aligned with the first item time */}
                     <span className={`absolute left-20 top-2 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dotColor}`} />
 
-                    <Card
-                      role='button'
-                      tabIndex={0}
-                      onClick={() => onSelect?.(t)}
-                      className={`cursor-pointer p-3 shadow-sm transition-colors hover:bg-accent/30 ${isDueOnly ? 'opacity-90' : ''}`}
-                    >
-                      <div className='flex items-center justify-between gap-3'>
-                        <div className={`min-w-0 truncate font-medium leading-tight ${isDueOnly ? 'text-sm' : ''}`}>
-                          <span className='truncate'>{t.title}</span>
-                          {t.status && (
-                            <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
-                              {t.status}
-                            </Badge>
-                          )}
-                        </div>
-                        {t.startAt && t.endAt && (
-                          <div className='shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground'>
-                            {fmtHM(t.startAt)} → {fmtHM(t.endAt)}
+                    {/* Stacked cards with slight right shift when overlapping */}
+                    <div>
+                      {g.map(({ task: t, isDueOnly }, idx) => {
+                        const shiftX = idx * 12; // px per stacked layer
+                        const overlapLift = idx === 0 ? 0 : 8; // px to overlap upward for visual stacking
+                        return (
+                          <div
+                            key={t.id}
+                            className={idx === 0 ? '' : '-mt-2'}
+                            style={{ marginLeft: shiftX }}
+                          >
+                            <Card
+                              role='button'
+                              tabIndex={0}
+                              onClick={() => onSelect?.(t)}
+                              style={{ zIndex: idx + 1, position: 'relative', top: -overlapLift }}
+                              className={`cursor-pointer p-3 shadow-sm transition-colors hover:bg-accent/30 ${isDueOnly ? 'opacity-90' : ''}`}
+                            >
+                              <div className='flex items-center justify-between gap-3'>
+                                <div className={`min-w-0 truncate font-medium leading-tight ${isDueOnly ? 'text-sm' : ''}`}>
+                                  <span className='truncate'>{t.title}</span>
+                                  {t.status && (
+                                    <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
+                                      {t.status}
+                                    </Badge>
+                                  )}
+                                </div>
+                                {t.startAt && t.endAt && (
+                                  <div className='shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground'>
+                                    {fmtHM(t.startAt)} → {fmtHM(t.endAt)}
+                                  </div>
+                                )}
+                              </div>
+                              {t.note && <div className='mt-1 truncate text-xs text-muted-foreground'>{t.note}</div>}
+                            </Card>
                           </div>
-                        )}
-                      </div>
-                      {t.note && <div className='mt-1 truncate text-xs text-muted-foreground'>{t.note}</div>}
-                    </Card>
+                        );
+                      })}
+                    </div>
                   </li>
                 );
               })}
