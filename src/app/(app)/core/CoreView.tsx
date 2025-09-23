@@ -1,12 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CaptureBar } from '@/components/CaptureBar';
 import { Timeline } from '@/components/Timeline';
+import { TimelineGrid } from '@/components/TimelineGrid';
 import { UntimedPane } from '@/components/UntimedPane';
 import { AddTaskButton } from '@/components/AddTaskButton';
 import { TaskSheet } from '@/components/TaskSheet';
+import { postJSON } from '@/libs/api';
 
 export type UITask = {
   id: string;
@@ -30,6 +32,7 @@ export function CoreView({
   untimed: UITask[];
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<UITask | null>(null);
 
@@ -46,6 +49,33 @@ export function CoreView({
 
   const timedMemo = useMemo(() => timed, [timed]);
   const untimedMemo = useMemo(() => untimed, [untimed]);
+  const useGrid = (searchParams?.get?.('grid') || '') === '1';
+
+  const handleCreateAt = async (startUtc: string, endUtc: string) => {
+    try {
+      const created: any = await postJSON('/api/tasks', {
+        title: 'New task',
+        startAt: startUtc,
+        endAt: endUtc,
+        status: 'todo',
+        source: 'manual',
+      });
+      const ui: UITask = {
+        id: created.id,
+        title: created.title,
+        note: created.note ?? undefined,
+        startAt: created.start_at ?? undefined,
+        endAt: created.end_at ?? undefined,
+        dueAt: created.due_at ?? undefined,
+        status: created.status ?? 'todo',
+      };
+      setSelected(ui);
+      setOpen(true);
+      router.refresh();
+    } catch (e) {
+      console.error('Create task failed', e);
+    }
+  };
 
   return (
     <>
@@ -56,7 +86,19 @@ export function CoreView({
         <UntimedPane tasks={untimedMemo} onSelect={handleSelect} />
       </div>
       <div className='mb-6'>
-        <Timeline tasks={timedMemo} tz={tz} onSelect={handleSelect} />
+        {useGrid ? (
+          <TimelineGrid
+            tasks={timedMemo}
+            tz={tz}
+            dayKey={dayKey}
+            stepMin={30}
+            defaultDurationMin={30}
+            onSelect={handleSelect}
+            onCreate={handleCreateAt}
+          />
+        ) : (
+          <Timeline tasks={timedMemo} tz={tz} onSelect={handleSelect} />
+        )}
       </div>
       <AddTaskButton tz={tz} />
       <TaskSheet open={open} onOpenChange={setOpen} task={selected ?? undefined} tz={tz} onSaved={refreshAndClose} />
