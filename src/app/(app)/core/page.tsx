@@ -4,7 +4,11 @@ import { CoreView } from './CoreView';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { toUTC, userDayUtcRange } from '@/libs/tz';
 
-export default async function CorePage({ searchParams }: { searchParams?: { date?: string } }) {
+export default async function CorePage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -16,9 +20,10 @@ export default async function CorePage({ searchParams }: { searchParams?: { date
   const { dayKey: todayKey } = userDayUtcRange(nowUTC, tz);
 
   // Allow date override via ?date=YYYY-MM-DD (user TZ)
-  const inputDate = searchParams?.date;
-  const isValidDate = inputDate && /^\d{4}-\d{2}-\d{2}$/.test(inputDate);
-  const dayKey = (isValidDate ? (inputDate as string) : todayKey) as string;
+  const sp = (await searchParams) ?? {};
+  const rawDate = Array.isArray(sp.date) ? sp.date[0] : sp.date;
+  const isValidDate = typeof rawDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(rawDate);
+  const dayKey = isValidDate ? (rawDate as string) : todayKey;
 
   const startUtc = toUTC(`${dayKey}T00:00:00`, tz);
   const endUtc = toUTC(`${dayKey}T23:59:59`, tz);
