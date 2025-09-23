@@ -1,6 +1,8 @@
 'use client';
 
 import { fromUTC } from '@/libs/tz';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 type Task = {
   id: string;
@@ -69,20 +71,21 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                   {/* dot */}
                   <span className={`absolute left-20 top-2 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dotColor}`} />
 
-                  <button
-                    className={`w-full rounded-md border p-2 text-left transition-colors hover:border-accent hover:bg-accent/50 ${isDueOnly ? 'opacity-90' : ''}`}
+                  <Card
+                    role='button'
+                    tabIndex={0}
                     onClick={() => onSelect?.(t)}
+                    className={`cursor-pointer p-3 shadow-sm transition-colors hover:bg-accent/30 ${isDueOnly ? 'opacity-90' : ''}`}
                   >
-                    <div className='flex items-center justify-between gap-2'>
-                      <div className={`truncate font-medium leading-tight ${isDueOnly ? 'text-sm' : ''}`}>
+                    <div className='flex items-center justify-between gap-3'>
+                      <div className={`min-w-0 truncate font-medium leading-tight ${isDueOnly ? 'text-sm' : ''}`}>
                         <span className='truncate'>{t.title}</span>
                         {t.status && (
-                          <span className='ml-2 align-middle rounded-full bg-accent px-1.5 py-[1px] text-[10px] uppercase text-accent-foreground'>
+                          <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
                             {t.status}
-                          </span>
+                          </Badge>
                         )}
                       </div>
-                      {/* keep right-side range for ranges; for due-only we rely on left label */}
                       {t.startAt && t.endAt && (
                         <div className='shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground'>
                           {fmtHM(t.startAt)} → {fmtHM(t.endAt)}
@@ -90,7 +93,7 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                       )}
                     </div>
                     {t.note && <div className='mt-1 truncate text-xs text-muted-foreground'>{t.note}</div>}
-                  </button>
+                  </Card>
                 </li>
               );
             })}
