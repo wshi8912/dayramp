@@ -53,7 +53,7 @@ export function TimelineGrid({
   onCreate,
 }: TimelineGridProps) {
   // Visual scale
-  const PX_PER_MIN = density === 'compact' ? 1 : 2; // compact: 1px/min (1h=60px), expanded: 2px/min (1h=120px)
+  const PX_PER_MIN = density === 'compact' ? 0.85 : 2; // compact ~15% smaller than before (1h≈51px), expanded: 2px/min (1h=120px)
   // Define visible window in hours, then convert to minutes (avoid unit mixups)
   const startHour = Math.max(0, Math.min(24, dayStartHour));
   const endHour = Math.max(startHour + 1, Math.min(24, dayEndHour)); // ensure at least 1 hour
@@ -195,7 +195,7 @@ export function TimelineGrid({
       <div className='grid grid-cols-[5rem_1fr] gap-2'>
         {/* Left hour labels */}
         <div className='relative select-none'>
-          <ul className='flex flex-col text-[11px] font-mono leading-6 text-muted-foreground/80'>
+          <ul className='flex flex-col text-[11px] font-mono font-medium leading-6 text-foreground'>
             {hourRows.map((h) => (
               <li
                 key={`lab-${h.min}`}
