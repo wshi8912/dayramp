@@ -60,37 +60,64 @@ export function TimelineGrid({
   const VISIBLE_TOTAL_MIN = Math.max(1, VISIBLE_END_MIN - VISIBLE_START_MIN);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const toMinutes = useCallback(
-    (iso?: string) => {
-      if (!iso) return null;
-      const s = fromUTC(iso, tz).localISO.slice(11, 16); // HH:MM
-      const hh = Number(s.slice(0, 2));
-      const mm = Number(s.slice(3, 5));
-      if (Number.isNaN(hh) || Number.isNaN(mm)) return null;
-      return hh * 60 + mm;
-    },
-    [tz]
-  );
+  const minOfDayFromLocalISO = useCallback((localISO: string) => {
+    const s = localISO.slice(11, 16); // HH:MM
+    const hh = Number(s.slice(0, 2));
+    const mm = Number(s.slice(3, 5));
+    return hh * 60 + mm;
+  }, []);
 
   const spans = useMemo<Span[]>(() => {
     const arr: Span[] = [];
     for (const t of tasks) {
-      const s = toMinutes(t.startAt ?? t.dueAt);
-      // If both start/end absent and due present -> marker; else if only start -> default duration
-      const e = t.startAt
-        ? toMinutes(t.endAt) ?? ((toMinutes(t.startAt) ?? 0) + defaultDurationMin)
-        : t.dueAt
-        ? (toMinutes(t.dueAt) ?? 0) + 1 // tiny height for due marker
-        : null;
-      if (s == null) continue;
-      const startMin = Math.max(0, Math.min(24 * 60, s));
-      const endMin = Math.max(startMin, Math.min(24 * 60, e ?? startMin));
-      arr.push({ id: t.id, src: t, startMin, endMin });
+      const sInfo = t.startAt ? fromUTC(t.startAt, tz) : undefined;
+      const eInfo = t.endAt ? fromUTC(t.endAt, tz) : undefined;
+      const dInfo = t.dueAt ? fromUTC(t.dueAt, tz) : undefined;
+
+      // Due-only marker: include only if due date is dayKey
+      if (!sInfo && !eInfo && dInfo) {
+        if (dInfo.dateKey !== dayKey) continue;
+        const m = minOfDayFromLocalISO(dInfo.localISO);
+        const startMin = Math.max(0, Math.min(24 * 60, m));
+        const endMin = Math.min(24 * 60, startMin + 1);
+        arr.push({ id: t.id, src: t, startMin, endMin });
+        continue;
+      }
+
+      // Range (start..end) or start-only
+      if (sInfo) {
+        let sDay = sInfo.dateKey;
+        let sMin = minOfDayFromLocalISO(sInfo.localISO);
+        let eDay: string;
+        let eMin: number;
+
+        if (eInfo) {
+          eDay = eInfo.dateKey;
+          eMin = minOfDayFromLocalISO(eInfo.localISO);
+
+          const overlaps = sDay === dayKey || eDay === dayKey || (sDay < dayKey && eDay > dayKey);
+          if (!overlaps) continue;
+
+          // Clip to day window [0, 1440]
+          const startMin = sDay < dayKey ? 0 : sDay > dayKey ? 24 * 60 : sMin;
+          const endMin = eDay > dayKey ? 24 * 60 : eDay < dayKey ? 0 : eMin;
+          const clippedStart = Math.max(0, Math.min(24 * 60, startMin));
+          const clippedEnd = Math.max(0, Math.min(24 * 60, endMin));
+          if (clippedEnd <= clippedStart) continue;
+          arr.push({ id: t.id, src: t, startMin: clippedStart, endMin: clippedEnd });
+        } else {
+          // Start-only: include only if it belongs to the day
+          if (sDay !== dayKey) continue;
+          const startMin = Math.max(0, Math.min(24 * 60, sMin));
+          const endMin = Math.max(startMin + 1, Math.min(24 * 60, sMin + defaultDurationMin));
+          arr.push({ id: t.id, src: t, startMin, endMin });
+        }
+      }
     }
     // Sort by start; for equal start, longer first to stabilize layout
     arr.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
     return arr;
-  }, [tasks, toMinutes, defaultDurationMin]);
+  }, [tasks, tz, dayKey, minOfDayFromLocalISO, defaultDurationMin]);
 
   const { layout, groupCols } = useMemo(() => {
     const active: { id: string; endMin: number; col: number }[] = [];
