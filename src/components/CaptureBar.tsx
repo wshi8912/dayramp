@@ -141,7 +141,6 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
 
   const onStart = async () => {
     setError(null);
-    setResultInfo(null);
     if (!navigator.mediaDevices) {
       setSupported(false);
       return;
