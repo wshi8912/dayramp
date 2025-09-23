@@ -23,6 +23,7 @@ export type TimelineGridProps = {
   defaultDurationMin?: number; // for click-to-create
   dayStartHour?: number; // visible window start hour
   dayEndHour?: number; // visible window end hour
+  density?: 'expanded' | 'compact';
   onSelect?: (t: Task) => void;
   onCreate?: (startUtcISO: string, endUtcISO: string) => void;
 };
@@ -47,11 +48,12 @@ export function TimelineGrid({
   defaultDurationMin = 30,
   dayStartHour = 5,
   dayEndHour = 24,
+  density = 'expanded',
   onSelect,
   onCreate,
 }: TimelineGridProps) {
   // Visual scale
-  const PX_PER_MIN = 2; // 2px per minute -> 30m = 60px, 1h = 120px
+  const PX_PER_MIN = density === 'compact' ? 1 : 2; // compact: 1px/min (1h=60px), expanded: 2px/min (1h=120px)
   // Define visible window in hours, then convert to minutes (avoid unit mixups)
   const startHour = Math.max(0, Math.min(24, dayStartHour));
   const endHour = Math.max(startHour + 1, Math.min(24, dayEndHour)); // ensure at least 1 hour
@@ -148,13 +150,19 @@ export function TimelineGrid({
     return { layout, groupCols };
   }, [spans]);
 
-  const hours = useMemo(() => {
+  const hourRows = useMemo(() => {
     const list: { label: string; min: number }[] = [];
-    for (let hour = startHour; hour <= endHour; hour += 1) {
-      const label = hour < 24 ? `${String(hour).padStart(2, '0')}:00` : '24:00';
+    for (let hour = startHour; hour < endHour; hour += 1) {
+      const label = `${String(hour).padStart(2, '0')}:00`;
       list.push({ label, min: hour * 60 });
     }
     return list;
+  }, [startHour, endHour]);
+
+  const hourMarks = useMemo(() => {
+    const mins: number[] = [];
+    for (let hour = startHour; hour <= endHour; hour += 1) mins.push(hour * 60);
+    return mins;
   }, [startHour, endHour]);
 
   const onGridClick = useCallback(
@@ -188,8 +196,12 @@ export function TimelineGrid({
         {/* Left hour labels */}
         <div className='relative select-none'>
           <ul className='flex flex-col text-[11px] font-mono leading-6 text-muted-foreground/80'>
-            {hours.map((h) => (
-              <li key={`lab-${h.min}`} className='relative h-[120px] flex items-start justify-end pr-2 tabular-nums'>
+            {hourRows.map((h) => (
+              <li
+                key={`lab-${h.min}`}
+                className='relative flex items-start justify-end pr-2 tabular-nums'
+                style={{ height: 60 * PX_PER_MIN }}
+              >
                 <span className='sticky top-0 mt-[-6px]'>{h.label}</span>
                 <span className='pointer-events-none absolute right-[-1px] top-0 h-px w-2 bg-border' />
               </li>
@@ -208,14 +220,14 @@ export function TimelineGrid({
             style={{ height: VISIBLE_TOTAL_MIN * PX_PER_MIN, overflow: 'hidden' }}
           >
             {/* Hour lines */}
-            {hours.map((h) => {
-              const top = (h.min - VISIBLE_START_MIN) * PX_PER_MIN;
+            {hourMarks.map((min) => {
+              const top = (min - VISIBLE_START_MIN) * PX_PER_MIN;
               return (
-                <div key={`hl-${h.min}`} className='absolute left-0 right-0 h-px bg-border' style={{ top }} />
+                <div key={`hl-${min}`} className='absolute left-0 right-0 h-px bg-border' style={{ top }} />
               );
             })}
             {/* Half-hour minor lines */}
-            {hours.map((h) => {
+            {hourRows.map((h) => {
               const top = (h.min + 30 - VISIBLE_START_MIN) * PX_PER_MIN;
               if (h.min + 30 > VISIBLE_END_MIN) return null;
               return (

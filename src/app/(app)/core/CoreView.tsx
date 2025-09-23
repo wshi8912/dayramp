@@ -9,6 +9,7 @@ import { UntimedPane } from '@/components/UntimedPane';
 import { AddTaskButton } from '@/components/AddTaskButton';
 import { TaskSheet } from '@/components/TaskSheet';
 import { postJSON } from '@/libs/api';
+import { Button } from '@/components/ui/button';
 
 export type UITask = {
   id: string;
@@ -50,6 +51,14 @@ export function CoreView({
   const timedMemo = useMemo(() => timed, [timed]);
   const untimedMemo = useMemo(() => untimed, [untimed]);
   const useGrid = (searchParams?.get?.('grid') || '') === '1';
+  const denseMode = (searchParams?.get?.('dense') || '') === '1';
+
+  const pushWithParam = (key: string, value: string | null) => {
+    const params = new URLSearchParams(Array.from(searchParams?.entries?.() || []));
+    if (value == null) params.delete(key);
+    else params.set(key, value);
+    router.push(`/core?${params.toString()}`);
+  };
 
   const handleCreateAt = async (startUtc: string, endUtc: string) => {
     try {
@@ -86,6 +95,26 @@ export function CoreView({
         <UntimedPane tasks={untimedMemo} onSelect={handleSelect} />
       </div>
       <div className='mb-6'>
+        {useGrid && (
+          <div className='mb-2 flex items-center justify-end gap-2'>
+            <Button
+              type='button'
+              variant={denseMode ? 'default' : 'outline'}
+              size='sm'
+              onClick={() => pushWithParam('dense', '1')}
+            >
+              Compact
+            </Button>
+            <Button
+              type='button'
+              variant={!denseMode ? 'default' : 'outline'}
+              size='sm'
+              onClick={() => pushWithParam('dense', '0')}
+            >
+              Expanded
+            </Button>
+          </div>
+        )}
         {useGrid ? (
           <TimelineGrid
             tasks={timedMemo}
@@ -93,6 +122,7 @@ export function CoreView({
             dayKey={dayKey}
             stepMin={30}
             defaultDurationMin={30}
+            density={denseMode ? 'compact' : 'expanded'}
             onSelect={handleSelect}
             onCreate={handleCreateAt}
           />
