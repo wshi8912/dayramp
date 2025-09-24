@@ -10,6 +10,7 @@ import { AddTaskButton } from '@/components/AddTaskButton';
 import { TaskSheet } from '@/components/TaskSheet';
 import { postJSON } from '@/libs/api';
 import { Button } from '@/components/ui/button';
+import { Calendar, List } from 'lucide-react';
 
 export type UITask = {
   id: string;
@@ -50,7 +51,9 @@ export function CoreView({
 
   const timedMemo = useMemo(() => timed, [timed]);
   const untimedMemo = useMemo(() => untimed, [untimed]);
-  const useGrid = (searchParams?.get?.('grid') || '') === '1';
+  // Default to calendar view (grid)
+  const viewParam = searchParams?.get?.('view');
+  const useGrid = viewParam !== 'list'; // Default to calendar (grid) view
   // Default to compact when param is missing
   const denseParam = searchParams?.get?.('dense');
   const denseMode = (denseParam == null ? '1' : denseParam) === '1';
@@ -117,20 +120,33 @@ export function CoreView({
             </Button>
           </div>
         )}
-        {useGrid ? (
-          <TimelineGrid
-            tasks={timedMemo}
-            tz={tz}
-            dayKey={dayKey}
-            stepMin={30}
-            defaultDurationMin={30}
-            density={denseMode ? 'compact' : 'expanded'}
-            onSelect={handleSelect}
-            onCreate={handleCreateAt}
-          />
-        ) : (
-          <Timeline tasks={timedMemo} tz={tz} onSelect={handleSelect} />
-        )}
+        <div className='relative'>
+          {/* View toggle button in the top-right corner */}
+          <Button
+            variant='ghost'
+            size='sm'
+            className='absolute right-3 top-3 z-10 h-8 w-8 p-0'
+            onClick={() => pushWithParam('view', useGrid ? 'list' : null)}
+            title={useGrid ? 'Switch to list view' : 'Switch to calendar view'}
+          >
+            {useGrid ? <List className='h-4 w-4' /> : <Calendar className='h-4 w-4' />}
+          </Button>
+
+          {useGrid ? (
+            <TimelineGrid
+              tasks={timedMemo}
+              tz={tz}
+              dayKey={dayKey}
+              stepMin={30}
+              defaultDurationMin={30}
+              density={denseMode ? 'compact' : 'expanded'}
+              onSelect={handleSelect}
+              onCreate={handleCreateAt}
+            />
+          ) : (
+            <Timeline tasks={timedMemo} tz={tz} onSelect={handleSelect} />
+          )}
+        </div>
       </div>
       <AddTaskButton tz={tz} />
       <TaskSheet open={open} onOpenChange={setOpen} task={selected ?? undefined} tz={tz} onSaved={refreshAndClose} />
