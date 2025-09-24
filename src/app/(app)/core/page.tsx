@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/button';
-import { signOutAction } from '@/app/(auth)/auth-actions';
 import { CoreView } from './CoreView';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { toUTC, userDayUtcRange } from '@/libs/tz';
@@ -14,7 +12,7 @@ export default async function CorePage({
 
   // Fallback to UTC if not found
   const { data: userRow } = await supabase.from('users').select('timezone').single();
-  const tz = userRow?.timezone || 'UTC';
+  const tz = (userRow?.timezone as string) || 'UTC';
 
   const nowUTC = new Date().toISOString();
   const { dayKey: todayKey } = userDayUtcRange(nowUTC, tz);
@@ -94,7 +92,7 @@ export default async function CorePage({
     }));
 
   return (
-    <div className='container mx-auto max-w-5xl px-4 py-8'>
+    <div className='container mx-auto max-w-5xl px-0 sm:px-4 py-4 sm:py-8'>
       <CoreView tz={tz} dayKey={dayKey} timed={timed} untimed={untimed} />
     </div>
   );
