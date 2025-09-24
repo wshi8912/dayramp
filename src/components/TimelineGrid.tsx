@@ -304,7 +304,7 @@ export function TimelineGrid({
                     {/* leading dot */}
                     <span className={`absolute left-1 top-1 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dotColor}`} />
                     <div className='ml-4 flex items-center justify-between gap-2'>
-                      <div className={`min-w-0 truncate font-medium leading-tight ${density === 'compact' ? 'text-xs' : ''} ${isDueOnly && density !== 'compact' ? 'text-sm' : ''}`}>
+                      <div className={`min-w-0 truncate font-medium leading-tight ${density === 'compact' ? 'text-xs' : 'text-sm'}`}>
                         <span className='truncate'>{t.title}</span>
                         {density !== 'compact' && t.status && (
                           <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
@@ -314,7 +314,7 @@ export function TimelineGrid({
                       </div>
                     </div>
                     {density !== 'compact' && t.note && (
-                      <div className='mt-1 truncate text-xs text-muted-foreground ml-4'>{t.note}</div>
+                      <div className='mt-1 truncate text-xs text-gray-600 ml-4'>{t.note}</div>
                     )}
                   </Card>
                 </div>

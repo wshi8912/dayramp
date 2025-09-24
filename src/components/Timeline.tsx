@@ -151,7 +151,7 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                               className={`cursor-pointer p-3 shadow-sm transition-colors hover:bg-accent/30 ${isDueOnly ? 'opacity-90' : ''}`}
                             >
                               <div className='flex items-center justify-between gap-3'>
-                                <div className={`min-w-0 truncate font-medium leading-tight ${isDueOnly ? 'text-sm' : ''}`}>
+                                <div className='min-w-0 truncate text-sm font-medium leading-tight'>
                                   <span className='truncate'>{t.title}</span>
                                   {t.status && (
                                     <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
@@ -165,7 +165,7 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                                   </div>
                                 )}
                               </div>
-                              {t.note && <div className='mt-1 truncate text-xs text-muted-foreground'>{t.note}</div>}
+                              {t.note && <div className='mt-1 truncate text-xs text-gray-600'>{t.note}</div>}
                             </Card>
                           </div>
                         );

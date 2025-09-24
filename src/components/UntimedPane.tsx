@@ -38,7 +38,7 @@ export function UntimedPane({ tasks, onSelect }: { tasks: Task[]; onSelect?: (t:
                 className='cursor-pointer p-3 shadow-sm transition-colors hover:bg-accent/30'
               >
                 <div className='flex items-center justify-between gap-2'>
-                  <div className='truncate font-medium leading-tight'>
+                  <div className='truncate text-sm font-medium leading-tight'>
                     <span className='truncate'>{t.title}</span>
                   </div>
                   <div className='flex items-center gap-2'>
@@ -59,7 +59,7 @@ export function UntimedPane({ tasks, onSelect }: { tasks: Task[]; onSelect?: (t:
                     )}
                   </div>
                 </div>
-                {t.note && <div className='mt-1 truncate text-xs text-muted-foreground'>{t.note}</div>}
+                {t.note && <div className='mt-1 truncate text-xs text-gray-600'>{t.note}</div>}
               </Card>
             );
           })}
