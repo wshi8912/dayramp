@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Play, Circle } from 'lucide-react';
@@ -39,7 +40,8 @@ function CircularProgress({ progress, color, size = 16 }: { progress: number; co
           strokeWidth="2"
           fill="none"
           strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
+          // Render as string to keep attribute type stable
+          strokeDashoffset={String(strokeDashoffset)}
           className={`transition-all duration-300 ${color}`}
           strokeLinecap="round"
         />
@@ -48,11 +50,24 @@ function CircularProgress({ progress, color, size = 16 }: { progress: number; co
   );
 }
 
-export function UntimedPane({ tasks, onSelect }: { tasks: Task[]; onSelect?: (t: Task) => void }) {
+export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]; onSelect?: (t: Task) => void }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const formatTime = (isoString?: string) => {
     if (!isoString) return null;
     const date = new Date(isoString);
-    return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false });
+    try {
+      return new Intl.DateTimeFormat('ja-JP', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: tz,
+      }).format(date);
+    } catch {
+      // Fallback without timezone if environment lacks ICU data
+      return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
   };
 
   const calculateProgress = (dueAt: string) => {
@@ -120,7 +135,8 @@ export function UntimedPane({ tasks, onSelect }: { tasks: Task[]; onSelect?: (t:
             const dueTime = formatTime(t.dueAt);
             const taskTypeInfo = getTaskTypeInfo(t);
             const IconComponent = taskTypeInfo.icon;
-            const progress = t.dueAt ? calculateProgress(t.dueAt) : null;
+            // Avoid SSR/client mismatches: compute time-dependent UI only after mount
+            const progress = mounted && t.dueAt ? calculateProgress(t.dueAt) : null;
 
             return (
               <Card

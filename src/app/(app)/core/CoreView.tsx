@@ -86,7 +86,7 @@ export function CoreView({
         <CaptureBar tz={tz} dayKey={dayKey} />
       </div>
       <div className='mb-6'>
-        <UntimedPane tasks={untimedMemo} onSelect={handleSelect} />
+        <UntimedPane tz={tz} tasks={untimedMemo} onSelect={handleSelect} />
       </div>
       <div className='mb-6'>
         {useGrid && (
