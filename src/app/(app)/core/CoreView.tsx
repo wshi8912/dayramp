@@ -37,6 +37,8 @@ export function CoreView({
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<UITask | null>(null);
+  const [useGrid, setUseGrid] = useState(true); // Default to calendar view
+  const [denseMode, setDenseMode] = useState(true); // Default to compact
 
   const handleSelect = (task: UITask) => {
     setSelected(task);
@@ -51,19 +53,6 @@ export function CoreView({
 
   const timedMemo = useMemo(() => timed, [timed]);
   const untimedMemo = useMemo(() => untimed, [untimed]);
-  // Default to calendar view (grid)
-  const viewParam = searchParams?.get?.('view');
-  const useGrid = viewParam !== 'list'; // Default to calendar (grid) view
-  // Default to compact when param is missing
-  const denseParam = searchParams?.get?.('dense');
-  const denseMode = (denseParam == null ? '1' : denseParam) === '1';
-
-  const pushWithParam = (key: string, value: string | null) => {
-    const params = new URLSearchParams(Array.from(searchParams?.entries?.() || []));
-    if (value == null) params.delete(key);
-    else params.set(key, value);
-    router.push(`/core?${params.toString()}`);
-  };
 
   const handleCreateAt = async (startUtc: string, endUtc: string) => {
     try {
@@ -106,7 +95,7 @@ export function CoreView({
               type='button'
               variant={denseMode ? 'default' : 'outline'}
               size='sm'
-              onClick={() => pushWithParam('dense', '1')}
+              onClick={() => setDenseMode(true)}
             >
               Compact
             </Button>
@@ -114,7 +103,7 @@ export function CoreView({
               type='button'
               variant={!denseMode ? 'default' : 'outline'}
               size='sm'
-              onClick={() => pushWithParam('dense', '0')}
+              onClick={() => setDenseMode(false)}
             >
               Expanded
             </Button>
@@ -126,7 +115,7 @@ export function CoreView({
             variant='ghost'
             size='sm'
             className='absolute right-3 top-3 z-10 h-8 w-8 p-0'
-            onClick={() => pushWithParam('view', useGrid ? 'list' : null)}
+            onClick={() => setUseGrid(!useGrid)}
             title={useGrid ? 'Switch to list view' : 'Switch to calendar view'}
           >
             {useGrid ? <List className='h-4 w-4' /> : <Calendar className='h-4 w-4' />}
