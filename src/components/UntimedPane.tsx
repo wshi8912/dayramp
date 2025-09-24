@@ -96,13 +96,26 @@ export function UntimedPane({ tasks, onSelect }: { tasks: Task[]; onSelect?: (t:
     }
   };
 
+  // Sort: deadline tasks first (nearest dueAt first, including overdue),
+  // then tasks without deadlines (keep incoming order for stability).
+  const sortedTasks: Task[] = (() => {
+    const withDue = tasks.filter((t) => !!t.dueAt);
+    const withoutDue = tasks.filter((t) => !t.dueAt);
+    withDue.sort((a, b) => {
+      const ta = a.dueAt ? new Date(a.dueAt).getTime() : Number.POSITIVE_INFINITY;
+      const tb = b.dueAt ? new Date(b.dueAt).getTime() : Number.POSITIVE_INFINITY;
+      return ta - tb; // earlier (including overdue) first
+    });
+    return [...withDue, ...withoutDue];
+  })();
+
   return (
     <div className='rounded-lg border bg-card p-3 text-card-foreground'>
       {tasks.length === 0 ? (
         <div className='text-sm text-muted-foreground'>No tasks yet.</div>
       ) : (
         <div className='space-y-1.5'>
-          {tasks.map((t) => {
+          {sortedTasks.map((t) => {
             const startTime = formatTime(t.startAt);
             const dueTime = formatTime(t.dueAt);
             const taskTypeInfo = getTaskTypeInfo(t);
