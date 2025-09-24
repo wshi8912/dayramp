@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { fromUTC, toUTC } from '@/libs/tz';
@@ -61,6 +61,32 @@ export function TimelineGrid({
   const VISIBLE_END_MIN = endHour * 60;
   const VISIBLE_TOTAL_MIN = Math.max(1, VISIBLE_END_MIN - VISIBLE_START_MIN);
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Current time indicator
+  const [currentMin, setCurrentMin] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateCurrentTime = () => {
+      const nowUTC = new Date().toISOString();
+      const nowLocal = fromUTC(nowUTC, tz);
+
+      // Only show if it's today
+      if (nowLocal.dateKey === dayKey) {
+        const localTime = nowLocal.localISO.slice(11, 16); // HH:MM
+        const hh = Number(localTime.slice(0, 2));
+        const mm = Number(localTime.slice(3, 5));
+        const minutes = hh * 60 + mm;
+        setCurrentMin(minutes);
+      } else {
+        setCurrentMin(null);
+      }
+    };
+
+    updateCurrentTime();
+    const interval = setInterval(updateCurrentTime, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [tz, dayKey]);
 
   const minOfDayFromLocalISO = useCallback((localISO: string) => {
     const s = localISO.slice(11, 16); // HH:MM
@@ -234,6 +260,22 @@ export function TimelineGrid({
                 <div key={`ml-${h.min}`} className='absolute left-0 right-0 h-px bg-muted' style={{ top, opacity: 0.4 }} />
               );
             })}
+
+            {/* Current time indicator */}
+            {currentMin !== null &&
+             currentMin >= VISIBLE_START_MIN &&
+             currentMin <= VISIBLE_END_MIN && (
+              <div
+                className='absolute left-0 right-0 h-0.5 bg-orange-500 z-20 pointer-events-none'
+                style={{
+                  top: (currentMin - VISIBLE_START_MIN) * PX_PER_MIN,
+                  boxShadow: '0 0 4px rgba(251, 146, 60, 0.5)'
+                }}
+              >
+                {/* Small circular marker at the left edge */}
+                <div className='absolute -left-1 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-orange-500' />
+              </div>
+            )}
 
             {/* Events */}
             {spans.map((ev) => {
