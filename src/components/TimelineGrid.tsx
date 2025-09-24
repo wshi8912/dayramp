@@ -329,18 +329,18 @@ export function TimelineGrid({
                     role='button'
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); onSelect?.(t); }}
-                    className={`relative cursor-pointer ${density === 'compact' ? 'p-1' : 'p-2'} shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color} ${isDueOnly ? 'opacity-90' : ''}`}
+                    className={`relative cursor-pointer ${density === 'compact' ? 'p-1' : 'p-2'} shadow-sm transition-colors hover:bg-accent/30 ${
+                      taskTypeInfo.type === 'deadline' ? 'bg-orange-600 border-orange-700 text-white' :
+                      taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'bg-blue-600 border-blue-700 text-white' :
+                      'bg-gray-600 border-gray-700 text-white'
+                    } ${isDueOnly ? 'opacity-90' : ''}`}
                     style={{ height }}
                   >
                     {/* leading dot */}
                     <span className={`absolute left-1 top-1 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dotColor}`} />
                     <div className='ml-4 flex items-center justify-between gap-2'>
                       <div className={`flex items-center gap-1 min-w-0 truncate font-medium leading-tight ${density === 'compact' ? 'text-xs' : 'text-sm'}`}>
-                        <IconComponent className={`h-3 w-3 shrink-0 ${density === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3'} ${
-                          taskTypeInfo.type === 'deadline' ? 'text-orange-500' :
-                          taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'text-blue-500' :
-                          'text-gray-400'
-                        }`} />
+                        <IconComponent className={`h-3 w-3 shrink-0 ${density === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3'} text-white/80`} />
                         <span className='truncate'>{t.title}</span>
                         {density !== 'compact' && t.status && (
                           <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
@@ -350,7 +350,7 @@ export function TimelineGrid({
                       </div>
                     </div>
                     {density !== 'compact' && t.note && (
-                      <div className='mt-1 truncate text-xs text-gray-600 ml-4'>{t.note}</div>
+                      <div className='mt-1 truncate text-xs text-white/70 ml-4'>{t.note}</div>
                     )}
                   </Card>
                 </div>
