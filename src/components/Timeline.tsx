@@ -3,6 +3,7 @@
 import { fromUTC } from '@/libs/tz';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Clock, Play, Circle } from 'lucide-react';
 
 type Task = {
   id: string;
@@ -18,6 +19,34 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
   const fmt = (iso?: string) => (iso ? fromUTC(iso, tz).localISO.replace('T', ' ') : '');
   const fmtHM = (iso?: string) => (iso ? fromUTC(iso, tz).localISO.slice(11, 16) : '');
   const timeKey = (t: Task) => t.startAt || t.dueAt || '';
+
+  const getTaskTypeInfo = (task: Task) => {
+    if (task.dueAt && !task.startAt) {
+      return {
+        icon: Clock,
+        color: 'border-orange-200 bg-orange-50/30',
+        type: 'deadline'
+      };
+    } else if (task.startAt && task.endAt) {
+      return {
+        icon: Play,
+        color: 'border-blue-200 bg-blue-50/30',
+        type: 'scheduled'
+      };
+    } else if (task.startAt && !task.endAt) {
+      return {
+        icon: Play,
+        color: 'border-blue-200 bg-blue-50/30',
+        type: 'start-only'
+      };
+    } else {
+      return {
+        icon: Circle,
+        color: 'border-gray-200 bg-gray-50/30',
+        type: 'unscheduled'
+      };
+    }
+  };
   const sorted = [...tasks].sort((a, b) => {
     const ta = timeKey(a);
     const tb = timeKey(b);
@@ -137,6 +166,9 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                       {g.map(({ task: t, isDueOnly }, idx) => {
                         const shiftX = idx * 12; // px per stacked layer
                         const overlapLift = idx === 0 ? 0 : 8; // px to overlap upward for visual stacking
+                        const taskTypeInfo = getTaskTypeInfo(t);
+                        const IconComponent = taskTypeInfo.icon;
+
                         return (
                           <div
                             key={t.id}
@@ -148,10 +180,15 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                               tabIndex={0}
                               onClick={() => onSelect?.(t)}
                               style={{ zIndex: idx + 1, position: 'relative', top: -overlapLift }}
-                              className={`cursor-pointer p-3 shadow-sm transition-colors hover:bg-accent/30 ${isDueOnly ? 'opacity-90' : ''}`}
+                              className={`cursor-pointer p-3 shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color} ${isDueOnly ? 'opacity-90' : ''}`}
                             >
                               <div className='flex items-center justify-between gap-3'>
-                                <div className='min-w-0 truncate text-sm font-medium leading-tight'>
+                                <div className='flex items-center gap-2 min-w-0 truncate text-sm font-medium leading-tight'>
+                                  <IconComponent className={`h-4 w-4 shrink-0 ${
+                                    taskTypeInfo.type === 'deadline' ? 'text-orange-500' :
+                                    taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'text-blue-500' :
+                                    'text-gray-400'
+                                  }`} />
                                   <span className='truncate'>{t.title}</span>
                                   {t.status && (
                                     <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>

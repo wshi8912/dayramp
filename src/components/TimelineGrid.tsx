@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { fromUTC, toUTC } from '@/libs/tz';
+import { Clock, Play, Circle } from 'lucide-react';
 
 export type Task = {
   id: string;
@@ -64,6 +65,34 @@ export function TimelineGrid({
 
   // Current time indicator
   const [currentMin, setCurrentMin] = useState<number | null>(null);
+
+  const getTaskTypeInfo = useCallback((task: Task) => {
+    if (task.dueAt && !task.startAt) {
+      return {
+        icon: Clock,
+        color: 'border-orange-200 bg-orange-50/30',
+        type: 'deadline'
+      };
+    } else if (task.startAt && task.endAt) {
+      return {
+        icon: Play,
+        color: 'border-blue-200 bg-blue-50/30',
+        type: 'scheduled'
+      };
+    } else if (task.startAt && !task.endAt) {
+      return {
+        icon: Play,
+        color: 'border-blue-200 bg-blue-50/30',
+        type: 'start-only'
+      };
+    } else {
+      return {
+        icon: Circle,
+        color: 'border-gray-200 bg-gray-50/30',
+        type: 'unscheduled'
+      };
+    }
+  }, []);
 
   useEffect(() => {
     const updateCurrentTime = () => {
@@ -287,6 +316,8 @@ export function TimelineGrid({
               const height = Math.max(18, (ev.endMin - ev.startMin) * PX_PER_MIN);
               const t = ev.src;
               const isDueOnly = !!t.dueAt && !t.startAt && !t.endAt;
+              const taskTypeInfo = getTaskTypeInfo(t);
+              const IconComponent = taskTypeInfo.icon;
               const dotColor = t.status === 'done' ? 'bg-muted-foreground' : isDueOnly ? 'bg-amber-500' : 'bg-primary';
               return (
                 <div
@@ -298,13 +329,18 @@ export function TimelineGrid({
                     role='button'
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); onSelect?.(t); }}
-                    className={`relative cursor-pointer ${density === 'compact' ? 'p-1' : 'p-2'} shadow-sm transition-colors hover:bg-accent/30 ${isDueOnly ? 'opacity-90' : ''}`}
+                    className={`relative cursor-pointer ${density === 'compact' ? 'p-1' : 'p-2'} shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color} ${isDueOnly ? 'opacity-90' : ''}`}
                     style={{ height }}
                   >
                     {/* leading dot */}
                     <span className={`absolute left-1 top-1 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dotColor}`} />
                     <div className='ml-4 flex items-center justify-between gap-2'>
-                      <div className={`min-w-0 truncate font-medium leading-tight ${density === 'compact' ? 'text-xs' : 'text-sm'}`}>
+                      <div className={`flex items-center gap-1 min-w-0 truncate font-medium leading-tight ${density === 'compact' ? 'text-xs' : 'text-sm'}`}>
+                        <IconComponent className={`h-3 w-3 shrink-0 ${density === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3'} ${
+                          taskTypeInfo.type === 'deadline' ? 'text-orange-500' :
+                          taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'text-blue-500' :
+                          'text-gray-400'
+                        }`} />
                         <span className='truncate'>{t.title}</span>
                         {density !== 'compact' && t.status && (
                           <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
