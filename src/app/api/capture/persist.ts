@@ -27,9 +27,23 @@ export async function saveEntryAndTasks(
 
   const tz = userTZ || schema.timezone;
   const toInsert = (schema.tasks || []).map((t) => {
-    const startAt = t.time?.type === 'range' && t.time.startLocal ? toUTC(t.time.startLocal, tz) : null;
-    const endAt = t.time?.type === 'range' && t.time.endLocal ? toUTC(t.time.endLocal, tz) : null;
-    const dueAt = t.time?.type === 'deadline' && t.time.dueLocal ? toUTC(t.time.dueLocal, tz) : null;
+    let startAt = null;
+    let endAt = null;
+    let dueAt = null;
+
+    if (t.time?.type === 'range') {
+      if (t.time.startLocal) {
+        startAt = toUTC(t.time.startLocal, tz);
+        // end_at is only set when start_at exists
+        if (t.time.endLocal) {
+          endAt = toUTC(t.time.endLocal, tz);
+        }
+      }
+      // If no startLocal, ignore endLocal (validation: end_at cannot exist without start_at)
+    } else if (t.time?.type === 'deadline' && t.time.dueLocal) {
+      dueAt = toUTC(t.time.dueLocal, tz);
+    }
+
     return {
       user_id: userId,
       entry_id: entry.id,

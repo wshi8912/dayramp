@@ -28,44 +28,70 @@ export default async function CorePage({
   const startUtc = toUTC(`${dayKey}T00:00:00`, tz);
   const endUtc = toUTC(`${dayKey}T23:59:59`, tz);
 
-  // Fetch tasks in range (start_at/due_at in range OR untimed created in range)
-  const or = [
-    // Tasks starting today in user's TZ
+  // Fetch tasks for calendar display (scheduled tasks + deadline tasks for today)
+  const calendarOr = [
+    // Tasks starting today
     `and(start_at.gte."${startUtc}",start_at.lt."${endUtc}")`,
-    // Tasks ending today in user's TZ (covers ranges that end today)
+    // Tasks ending today
     `and(end_at.gte."${startUtc}",end_at.lt."${endUtc}")`,
-    // Tasks overlapping today (start before endUtc AND end after startUtc)
+    // Tasks overlapping today (multi-day events)
     `and(start_at.lt."${endUtc}",end_at.gte."${startUtc}")`,
-    // Tasks due today
+    // Tasks due today (deadline only)
     `and(due_at.gte."${startUtc}",due_at.lt."${endUtc}")`,
-    // Untimed tasks created today (no start/end/due)
-    `and(start_at.is.null,due_at.is.null,end_at.is.null,created_at.gte."${startUtc}",created_at.lt."${endUtc}")`,
   ].join(',');
 
   const { data: tasks = [] } = await supabase
     .from('tasks')
     .select('*')
     .eq('user_id', user?.id || '')
-    .or(or)
+    .or(calendarOr)
+    .neq('status', 'deleted')
     .order('created_at', { ascending: false });
 
-  // Pinned tasks at top: unscheduled (no start/end/due), not completed
+  // Fetch tasks for upper pane: no time + start only + today's deadlines
+  const untimedOr = [
+    // Completely unscheduled tasks
+    `and(start_at.is.null,end_at.is.null,due_at.is.null)`,
+    // Start-only tasks (no end time, no deadline)
+    `and(start_at.not.is.null,end_at.is.null,due_at.is.null)`,
+    // Today's deadline tasks (also shown in upper pane)
+    `and(start_at.is.null,due_at.gte."${startUtc}",due_at.lt."${endUtc}")`,
+  ].join(',');
+
   const { data: untimedAll = [] } = await supabase
     .from('tasks')
     .select('*')
     .eq('user_id', user?.id || '')
-    .is('start_at', null)
-    .is('end_at', null)
-    .is('due_at', null)
+    .or(untimedOr)
+    .neq('status', 'deleted')
     .order('created_at', { ascending: false });
 
-  // Map DB -> UI props
+  // Map DB -> UI props for calendar (scheduled + deadlines)
   const timed = (tasks || [])
-    .filter((t: any) => t.start_at || t.end_at || t.due_at)
-    .map((t: any) => ({ id: t.id, title: t.title, note: t.note ?? undefined, startAt: t.start_at ?? undefined, endAt: t.end_at ?? undefined, dueAt: t.due_at ?? undefined, status: t.status }));
-  // Map separate pinned untimed list (regardless of created date)
+    .filter((t: any) =>
+      (t.start_at && t.end_at) || // Scheduled range
+      (!t.start_at && t.due_at)   // Deadline only
+    )
+    .map((t: any) => ({
+      id: t.id,
+      title: t.title,
+      note: t.note ?? undefined,
+      startAt: t.start_at ?? undefined,
+      endAt: t.end_at ?? undefined,
+      dueAt: t.due_at ?? undefined,
+      status: t.status
+    }));
+
+  // Map upper pane tasks
   const untimed = (untimedAll || [])
-    .map((t: any) => ({ id: t.id, title: t.title, note: t.note ?? undefined, status: t.status }));
+    .map((t: any) => ({
+      id: t.id,
+      title: t.title,
+      note: t.note ?? undefined,
+      startAt: t.start_at ?? undefined,  // Include for display
+      dueAt: t.due_at ?? undefined,      // Include for display
+      status: t.status
+    }));
 
   return (
     <div className='container mx-auto max-w-5xl px-4 py-8'>

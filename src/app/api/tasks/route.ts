@@ -62,12 +62,17 @@ export async function POST(request: NextRequest) {
 
   if (!title) return NextResponse.json({ error: 'Title is required' }, { status: 400 });
 
+  // Validation: end_at cannot exist without start_at
+  if (!startAt && endAt) {
+    return NextResponse.json({ error: 'End time cannot be set without a start time' }, { status: 400 });
+  }
+
   const insert = {
     user_id: user.id,
     title,
     note: note ?? null,
     start_at: startAt ?? null,
-    end_at: endAt ?? null,
+    end_at: (startAt && endAt) ? endAt : null, // Only set if start_at exists
     due_at: dueAt ?? null,
     estimate_min: estimateMin ?? null,
     priority: priority ?? null,

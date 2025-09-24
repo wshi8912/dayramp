@@ -75,8 +75,15 @@ export function TaskSheet({
         payload.endAt = null;
         payload.dueAt = null;
       } else if (timeType === 'range') {
+        // Validation: end_at cannot exist without start_at
+        if (!startLocal && endLocal) {
+          alert('End time cannot be set without a start time');
+          setSaving(false);
+          return;
+        }
         payload.startAt = startLocal ? toUTC(startLocal, tz) : null;
-        payload.endAt = endLocal ? toUTC(endLocal, tz) : null;
+        // Only set endAt if startAt exists
+        payload.endAt = (startLocal && endLocal) ? toUTC(endLocal, tz) : null;
         payload.dueAt = null;
       } else if (timeType === 'deadline') {
         payload.startAt = null;
