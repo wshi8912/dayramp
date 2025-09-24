@@ -180,7 +180,7 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                               tabIndex={0}
                               onClick={() => onSelect?.(t)}
                               style={{ zIndex: idx + 1, position: 'relative', top: -overlapLift }}
-                              className={`cursor-pointer p-3 shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color} ${isDueOnly ? 'opacity-90' : ''}`}
+                              className={`cursor-pointer rounded-md p-3 shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color} ${isDueOnly ? 'opacity-90' : ''}`}
                             >
                               <div className='flex items-center justify-between gap-3'>
                                 <div className='flex items-center gap-2 min-w-0 truncate text-sm font-medium leading-tight'>

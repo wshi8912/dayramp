@@ -329,7 +329,7 @@ export function TimelineGrid({
                     role='button'
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); onSelect?.(t); }}
-                    className={`relative cursor-pointer ${density === 'compact' ? 'p-1' : 'p-2'} shadow-sm transition-colors hover:bg-accent/30 ${
+                    className={`relative cursor-pointer rounded-md ${density === 'compact' ? 'p-1' : 'p-2'} shadow-sm transition-colors hover:bg-accent/30 ${
                       taskTypeInfo.type === 'deadline' ? 'bg-orange-600 border-orange-700 text-white' :
                       taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'bg-blue-600 border-blue-700 text-white' :
                       'bg-gray-600 border-gray-700 text-white'

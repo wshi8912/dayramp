@@ -115,7 +115,7 @@ export function UntimedPane({ tasks, onSelect }: { tasks: Task[]; onSelect?: (t:
                 role='button'
                 tabIndex={0}
                 onClick={() => onSelect?.(t)}
-                className={`cursor-pointer p-3 shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color}`}
+                className={`cursor-pointer rounded-md p-3 shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color}`}
               >
                 <div className='flex items-center justify-between gap-2'>
                   <div className='flex items-center gap-2 truncate text-sm font-medium leading-tight'>
