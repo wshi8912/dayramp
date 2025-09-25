@@ -25,7 +25,7 @@ export default async function ProjectsLayout({ children }: PropsWithChildren) {
         <main className='relative flex-1'>
           <div className='relative h-full'>{children}</div>
         </main>
-        {/* フッターはここで省略 */}
+        {/* Footer omitted here */}
       </div>
     </>
   );

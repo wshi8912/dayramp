@@ -96,9 +96,9 @@ where id = '12345678-1234-1234-1234-123456789012';
 
 insert into public.entries (id, user_id, source, transcript, audio_url, lang, created_at)
 values
-  ('11111111-1111-1111-1111-111111111111', '12345678-1234-1234-1234-123456789012', 'voice', '買い物リスト: 牛乳, 卵, パン', 'https://example.com/audio/grocery.mp3', 'ja', now() - interval '2 days'),
+  ('11111111-1111-1111-1111-111111111111', '12345678-1234-1234-1234-123456789012', 'voice', 'Grocery list: milk, eggs, bread', 'https://example.com/audio/grocery.mp3', 'en', now() - interval '2 days'),
   ('22222222-2222-2222-2222-222222222222', '12345678-1234-1234-1234-123456789012', 'text',  'Schedule weekly sync on Wednesday 3pm', null, 'en', now() - interval '1 day'),
-  ('33333333-3333-3333-3333-333333333333', '12345678-1234-1234-1234-123456789012', 'voice', '明日の午前にミーティング設定', 'https://example.com/audio/meeting.mp3', 'ja', now() - interval '6 hours'),
+  ('33333333-3333-3333-3333-333333333333', '12345678-1234-1234-1234-123456789012', 'voice', 'Schedule a meeting tomorrow morning', 'https://example.com/audio/meeting.mp3', 'en', now() - interval '6 hours'),
   ('44444444-4444-4444-4444-444444444444', '12345678-1234-1234-1234-123456789012', 'text',  'Plan weekend trip ideas', null, 'en', now() - interval '3 hours');
 
 
@@ -129,13 +129,13 @@ values (
   0.9
 );
 
--- Timed task today (linked to JA voice entry e3)
+-- Timed task today (linked to voice entry e3)
 insert into public.tasks (user_id, entry_id, title, note, start_at, end_at, estimate_min, priority, status, source, confidence)
 values (
   '12345678-1234-1234-1234-123456789012',
   '33333333-3333-3333-3333-333333333333',
-  'クライアントミーティング',
-  'Zoomリンクを確認',
+  'Client meeting',
+  'Check Zoom link',
   date_trunc('day', now()) + interval '13 hour 30 minute',
   date_trunc('day', now()) + interval '14 hour 30 minute',
   45,
@@ -406,13 +406,13 @@ values (
   0.6
 );
 
--- Untimed (linked to JA voice entry e1): 献立を作成
+-- Untimed (linked to voice entry e1): Create meal plan
 insert into public.tasks (user_id, entry_id, title, note, estimate_min, priority, status, source, confidence)
 values (
   '12345678-1234-1234-1234-123456789012',
   '11111111-1111-1111-1111-111111111111',
-  '献立を作成（買い物リストから）',
-  '1週間分のプラン',
+  'Create meal plan (from grocery list)',
+  '1-week plan',
   45,
   'mid',
   'todo',
@@ -420,13 +420,13 @@ values (
   0.7
 );
 
--- Untimed (linked to JA voice entry e3): 議事録作成
+-- Untimed (linked to voice entry e3): Create meeting minutes
 insert into public.tasks (user_id, entry_id, title, note, estimate_min, priority, status, source, confidence)
 values (
   '12345678-1234-1234-1234-123456789012',
   '33333333-3333-3333-3333-333333333333',
-  '議事録作成（クライアントミーティング）',
-  '要点をまとめる',
+  'Create meeting minutes (client meeting)',
+  'Summarize key points',
   40,
   'mid',
   'todo',
@@ -434,13 +434,13 @@ values (
   0.6
 );
 
--- +3 days: 週末旅行のアイデア調査 (timed, linked to text entry e4)
+-- +3 days: Research weekend trip ideas (timed, linked to text entry e4)
 insert into public.tasks (user_id, entry_id, title, note, start_at, end_at, estimate_min, priority, status, source, confidence)
 values (
   '12345678-1234-1234-1234-123456789012',
   '44444444-4444-4444-4444-444444444444',
-  '週末旅行のアイデア調査',
-  '温泉/自然スポット',
+  'Research weekend trip ideas',
+  'Hot springs / nature spots',
   date_trunc('day', now() + interval '3 day') + interval '20 hour',
   date_trunc('day', now() + interval '3 day') + interval '21 hour 30 minute',
   90,

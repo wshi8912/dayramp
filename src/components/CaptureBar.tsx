@@ -302,7 +302,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
             className={`rounded-md border px-3 py-1 text-center text-sm ${activeKey === prevKey ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}
             aria-pressed={activeKey === prevKey}
           >
-            <div className='text-[10px] text-muted-foreground'>前日</div>
+            <div className='text-[10px] text-muted-foreground'>Yesterday</div>
             <div className='font-medium'>{mmdd(prevKey)}</div>
           </button>
           <button
@@ -311,7 +311,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
             className={`rounded-md border px-3 py-1 text-center text-sm ${activeKey === todayKey ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}
             aria-pressed={activeKey === todayKey}
           >
-            <div className='text-[10px] text-muted-foreground'>今日</div>
+            <div className='text-[10px] text-muted-foreground'>Today</div>
             <div className='font-medium'>{mmdd(todayKey)}</div>
           </button>
           <button
@@ -320,7 +320,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
             className={`rounded-md border px-3 py-1 text-center text-sm ${activeKey === nextKey ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}
             aria-pressed={activeKey === nextKey}
           >
-            <div className='text-[10px] text-muted-foreground'>明日</div>
+            <div className='text-[10px] text-muted-foreground'>Tomorrow</div>
             <div className='font-medium'>{mmdd(nextKey)}</div>
           </button>
         </div>

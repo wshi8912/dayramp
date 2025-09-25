@@ -58,7 +58,7 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
     if (!isoString) return null;
     const date = new Date(isoString);
     try {
-      return new Intl.DateTimeFormat('ja-JP', {
+      return new Intl.DateTimeFormat('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
@@ -66,7 +66,7 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
       }).format(date);
     } catch {
       // Fallback without timezone if environment lacks ICU data
-      return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
     }
   };
 
@@ -172,7 +172,7 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
                     )}
                     {startTime && !t.dueAt && (
                       <Badge variant='outline' className='shrink-0 text-[10px]'>
-                        {startTime}開始
+                        {startTime} start
                       </Badge>
                     )}
                     {dueTime && (
@@ -182,7 +182,7 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
                           progress?.overdue ? 'text-red-600 border-red-300 bg-red-50' : 'text-orange-600 border-orange-300'
                         }`}
                       >
-                        {dueTime}{progress?.overdue ? '期限切れ' : '締切'}
+                        {dueTime} {progress?.overdue ? 'overdue' : 'due'}
                       </Badge>
                     )}
                     {t.status && (
