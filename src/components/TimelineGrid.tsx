@@ -65,6 +65,12 @@ export function TimelineGrid({
 
   // Current time indicator
   const [currentMin, setCurrentMin] = useState<number | null>(null);
+  const currentLabel = useMemo(() => {
+    if (currentMin === null) return '';
+    const hh = String(Math.floor(currentMin / 60)).padStart(2, '0');
+    const mm = String(currentMin % 60).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }, [currentMin]);
 
   const getTaskTypeInfo = useCallback((task: Task) => {
     if (task.dueAt && !task.startAt) {
@@ -295,14 +301,18 @@ export function TimelineGrid({
              currentMin >= VISIBLE_START_MIN &&
              currentMin <= VISIBLE_END_MIN && (
               <div
-                className='absolute left-0 right-0 h-0.5 bg-orange-500 z-20 pointer-events-none'
+                className='absolute left-0 right-0 h-0.5 bg-rose-500 z-30 pointer-events-none'
                 style={{
                   top: (currentMin - VISIBLE_START_MIN) * PX_PER_MIN,
-                  boxShadow: '0 0 4px rgba(251, 146, 60, 0.5)'
+                  boxShadow: '0 0 6px rgba(244, 63, 94, 0.55)'
                 }}
               >
                 {/* Small circular marker at the left edge */}
-                <div className='absolute -left-1 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-orange-500' />
+                <div className='absolute -left-1 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-rose-500' />
+                {/* Small time label for clarity */}
+                <div className='absolute left-2 -top-3 rounded px-1.5 py-0.5 text-[10px] font-medium bg-background text-rose-700 border border-rose-300 shadow-sm'>
+                  {currentLabel}
+                </div>
               </div>
             )}
 
