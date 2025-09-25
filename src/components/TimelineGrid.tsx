@@ -316,9 +316,14 @@ export function TimelineGrid({
               const height = Math.max(18, (ev.endMin - ev.startMin) * PX_PER_MIN);
               const t = ev.src;
               const isDueOnly = !!t.dueAt && !t.startAt && !t.endAt;
+              const isOverdue = isDueOnly && t.dueAt ? (new Date(t.dueAt).getTime() < Date.now()) : false;
               const taskTypeInfo = getTaskTypeInfo(t);
               const IconComponent = taskTypeInfo.icon;
-              const dotColor = t.status === 'done' ? 'bg-muted-foreground' : isDueOnly ? 'bg-amber-500' : 'bg-primary';
+              const dotColor = t.status === 'done'
+                ? 'bg-muted-foreground'
+                : isDueOnly
+                  ? (isOverdue ? 'bg-red-500' : 'bg-amber-500')
+                  : 'bg-primary';
               return (
                 <div
                   key={ev.id}
@@ -333,7 +338,7 @@ export function TimelineGrid({
                       taskTypeInfo.type === 'deadline' ? 'bg-orange-600 border-orange-700 text-white' :
                       taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'bg-blue-600 border-blue-700 text-white' :
                       'bg-gray-600 border-gray-700 text-white'
-                    } ${isDueOnly ? 'opacity-90' : ''}`}
+                    } ${isDueOnly ? 'opacity-90' : ''} ${isDueOnly && isOverdue ? 'ring-2 ring-red-400' : ''}`}
                     style={{ height }}
                   >
                     {/* leading dot */}

@@ -76,17 +76,24 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const endOfDay = new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1);
 
+    // If overdue, show MAX (100%) and red for strong emphasis
+    const overdue = now.getTime() > due.getTime();
+    if (overdue) {
+      return { progress: 100, color: 'text-red-500', overdue: true } as const;
+    }
+
+    // Otherwise, keep day-progress visualization
     const totalMs = endOfDay.getTime() - today.getTime();
     const elapsedMs = now.getTime() - today.getTime();
     const progress = Math.max(0, Math.min(100, (elapsedMs / totalMs) * 100));
 
-    // Color based on remaining time
+    // Color based on remaining time to due
     const remainingHours = (due.getTime() - now.getTime()) / (1000 * 60 * 60);
     let color = 'text-green-500';
     if (remainingHours < 2) color = 'text-red-500';
     else if (remainingHours < 4) color = 'text-yellow-500';
 
-    return { progress, color };
+    return { progress, color, overdue: false } as const;
   };
 
   const getTaskTypeInfo = (task: Task) => {
@@ -169,8 +176,13 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
                       </Badge>
                     )}
                     {dueTime && (
-                      <Badge variant='outline' className='shrink-0 text-[10px] text-orange-600 border-orange-300'>
-                        {dueTime}締切
+                      <Badge
+                        variant='outline'
+                        className={`shrink-0 text-[10px] ${
+                          progress?.overdue ? 'text-red-600 border-red-300 bg-red-50' : 'text-orange-600 border-orange-300'
+                        }`}
+                      >
+                        {dueTime}{progress?.overdue ? '期限切れ' : '締切'}
                       </Badge>
                     )}
                     {t.status && (
