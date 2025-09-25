@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { fromUTC, toUTC } from '@/libs/tz';
 import { Clock, Play, Circle } from 'lucide-react';
 
@@ -54,7 +53,8 @@ export function TimelineGrid({
   onCreate,
 }: TimelineGridProps) {
   // Visual scale
-  const PX_PER_MIN = density === 'compact' ? 0.85 : 2; // compact ~15% smaller than before (1h≈51px), expanded: 2px/min (1h=120px)
+  // Vertical scale per minute. Compact is 90% of previous compact (0.85 -> 0.765).
+  const PX_PER_MIN = density === 'compact' ? 0.765 : 2; // compact (1h≈45.9px), expanded: 2px/min (1h=120px)
   // Define visible window in hours, then convert to minutes (avoid unit mixups)
   const startHour = Math.max(0, Math.min(24, dayStartHour));
   const endHour = Math.max(startHour + 1, Math.min(24, dayEndHour)); // ensure at least 1 hour
@@ -357,11 +357,7 @@ export function TimelineGrid({
                       <div className={`flex items-center gap-1 min-w-0 truncate font-medium leading-tight ${density === 'compact' ? 'text-xs' : 'text-sm'}`}>
                         <IconComponent className={`h-3 w-3 shrink-0 ${density === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3'} text-white/80`} />
                         <span className='truncate'>{t.title}</span>
-                        {density !== 'compact' && t.status && (
-                          <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
-                            {t.status}
-                          </Badge>
-                        )}
+                        
                       </div>
                     </div>
                     {density !== 'compact' && t.note && (
