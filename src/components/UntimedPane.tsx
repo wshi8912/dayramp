@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { fromUTC } from '@/libs/tz';
 import { Clock, Play, Circle } from 'lucide-react';
 
 type Task = {
@@ -53,6 +55,18 @@ function CircularProgress({ progress, color, size = 16 }: { progress: number; co
 export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]; onSelect?: (t: Task) => void }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Local day keys for filtering
+  const { todayKey, tomorrowKey } = useMemo(() => {
+    const nowUTC = new Date().toISOString();
+    const { dateKey } = fromUTC(nowUTC, tz);
+    const d = new Date(`${dateKey}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + 1);
+    const tomorrow = d.toISOString().slice(0, 10);
+    return { todayKey: dateKey, tomorrowKey: tomorrow };
+  }, [tz]);
+
+  const [tab, setTab] = useState<'today' | 'tomorrow' | 'none'>('today');
 
   const formatTime = (isoString?: string) => {
     if (!isoString) return null;
@@ -118,8 +132,7 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
     }
   };
 
-  // Sort: deadline tasks first (nearest dueAt first, including overdue),
-  // then tasks without deadlines (keep incoming order for stability).
+  // Sort helper: deadline-first by ascending dueAt, then others.
   const sortedTasks: Task[] = (() => {
     const withDue = tasks.filter((t) => !!t.dueAt);
     const withoutDue = tasks.filter((t) => !t.dueAt);
@@ -131,73 +144,89 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
     return [...withDue, ...withoutDue];
   })();
 
+  // Tab-based filtering
+  const filtered = useMemo(() => {
+    if (tab === 'none') return sortedTasks.filter((t) => !t.dueAt);
+    const key = tab === 'today' ? todayKey : tomorrowKey;
+    return sortedTasks.filter((t) => t.dueAt && fromUTC(t.dueAt!, tz).dateKey === key);
+  }, [sortedTasks, tab, todayKey, tomorrowKey, tz]);
+
   return (
     <div className='rounded-lg border bg-card p-3 text-card-foreground'>
-      {tasks.length === 0 ? (
-        <div className='text-sm text-muted-foreground'>No tasks yet.</div>
-      ) : (
-        <div className='space-y-1.5'>
-          {sortedTasks.map((t) => {
-            const startTime = formatTime(t.startAt);
-            const dueTime = formatTime(t.dueAt);
-            const taskTypeInfo = getTaskTypeInfo(t);
-            const IconComponent = taskTypeInfo.icon;
-            // Avoid SSR/client mismatches: compute time-dependent UI only after mount
-            const progress = mounted && t.dueAt ? calculateProgress(t.dueAt) : null;
+      <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
+        <TabsList className='h-8 p-0.5 bg-muted/70 rounded-md'>
+          <TabsTrigger value='today' className='px-2.5 py-1 text-xs'>今日</TabsTrigger>
+          <TabsTrigger value='tomorrow' className='px-2.5 py-1 text-xs'>明日まで</TabsTrigger>
+          <TabsTrigger value='none' className='px-2.5 py-1 text-xs'>期限なし</TabsTrigger>
+        </TabsList>
+        <TabsContent value={tab} className='mt-2'>
+          {filtered.length === 0 ? (
+            <div className='text-sm text-muted-foreground'>No tasks.</div>
+          ) : (
+            <div className='space-y-1.5'>
+              {filtered.map((t) => {
+                const startTime = formatTime(t.startAt);
+                const dueTime = formatTime(t.dueAt);
+                const taskTypeInfo = getTaskTypeInfo(t);
+                const IconComponent = taskTypeInfo.icon;
+                // Avoid SSR/client mismatches: compute time-dependent UI only after mount
+                const progress = mounted && t.dueAt ? calculateProgress(t.dueAt) : null;
 
-            return (
-              <Card
-                key={t.id}
-                role='button'
-                tabIndex={0}
-                onClick={() => onSelect?.(t)}
-                className={`cursor-pointer rounded-md p-3 shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color}`}
-              >
-                <div className='flex items-center justify-between gap-2'>
-                  <div className='flex items-center gap-2 truncate text-sm font-medium leading-tight'>
-                    <IconComponent className={`h-4 w-4 shrink-0 ${
-                      taskTypeInfo.type === 'deadline' ? 'text-orange-500' :
-                      taskTypeInfo.type === 'start-only' ? 'text-blue-500' :
-                      'text-gray-400'
-                    }`} />
-                    <span className='truncate'>{t.title}</span>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    {progress && taskTypeInfo.type === 'deadline' && (
-                      <CircularProgress
-                        progress={progress.progress}
-                        color={progress.color}
-                        size={16}
-                      />
-                    )}
-                    {startTime && !t.dueAt && (
-                      <Badge variant='outline' className='shrink-0 text-[10px]'>
-                        {startTime} start
-                      </Badge>
-                    )}
-                    {dueTime && (
-                      <Badge
-                        variant='outline'
-                        className={`shrink-0 text-[10px] ${
-                          progress?.overdue ? 'text-red-600 border-red-300 bg-red-50' : 'text-orange-600 border-orange-300'
-                        }`}
-                      >
-                        {dueTime} {progress?.overdue ? 'overdue' : 'due'}
-                      </Badge>
-                    )}
-                    {t.status && (
-                      <Badge variant='secondary' className='shrink-0 text-[10px] uppercase'>
-                        {t.status}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                {t.note && <div className='mt-1 truncate text-xs text-gray-600'>{t.note}</div>}
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                return (
+                  <Card
+                    key={t.id}
+                    role='button'
+                    tabIndex={0}
+                    onClick={() => onSelect?.(t)}
+                    className={`cursor-pointer rounded-md p-3 shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color}`}
+                  >
+                    <div className='flex items-center justify-between gap-2'>
+                      <div className='flex items-center gap-2 truncate text-sm font-medium leading-tight'>
+                        <IconComponent className={`h-4 w-4 shrink-0 ${
+                          taskTypeInfo.type === 'deadline' ? 'text-orange-500' :
+                          taskTypeInfo.type === 'start-only' ? 'text-blue-500' :
+                          'text-gray-400'
+                        }`} />
+                        <span className='truncate'>{t.title}</span>
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        {progress && taskTypeInfo.type === 'deadline' && (
+                          <CircularProgress
+                            progress={progress.progress}
+                            color={progress.color}
+                            size={16}
+                          />
+                        )}
+                        {startTime && !t.dueAt && (
+                          <Badge variant='outline' className='shrink-0 text-[10px]'>
+                            {startTime} start
+                          </Badge>
+                        )}
+                        {dueTime && (
+                          <Badge
+                            variant='outline'
+                            className={`shrink-0 text-[10px] ${
+                              progress?.overdue ? 'text-red-600 border-red-300 bg-red-50' : 'text-orange-600 border-orange-300'
+                            }`}
+                          >
+                            {dueTime} {progress?.overdue ? 'overdue' : 'due'}
+                          </Badge>
+                        )}
+                        {t.status && (
+                          <Badge variant='secondary' className='shrink-0 text-[10px] uppercase'>
+                            {t.status}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    {t.note && <div className='mt-1 truncate text-xs text-gray-600'>{t.note}</div>}
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -25,6 +25,12 @@ export default async function CorePage({
 
   const startUtc = toUTC(`${dayKey}T00:00:00`, tz);
   const endUtc = toUTC(`${dayKey}T23:59:59`, tz);
+  // Compute tomorrow's range (in user's TZ) to support "due by tomorrow" tab in UntimedPane
+  const nextDayDate = new Date(`${dayKey}T00:00:00Z`);
+  nextDayDate.setUTCDate(nextDayDate.getUTCDate() + 1);
+  const tomorrowKey = nextDayDate.toISOString().slice(0, 10);
+  const startUtcTomorrow = toUTC(`${tomorrowKey}T00:00:00`, tz);
+  const endUtcTomorrow = toUTC(`${tomorrowKey}T23:59:59`, tz);
 
   // Fetch tasks for calendar display (scheduled tasks + deadline tasks for today)
   const calendarOr = [
@@ -46,7 +52,7 @@ export default async function CorePage({
     .neq('status', 'deleted')
     .order('created_at', { ascending: false });
 
-  // Fetch tasks for upper pane: no time + start only + today's deadlines
+  // Fetch tasks for upper pane: no time + start only + today's deadlines + tomorrow's deadlines
   const untimedOr = [
     // Completely unscheduled tasks
     `and(start_at.is.null,end_at.is.null,due_at.is.null)`,
@@ -54,6 +60,8 @@ export default async function CorePage({
     `and(start_at.not.is.null,end_at.is.null,due_at.is.null)`,
     // Today's deadline tasks (also shown in upper pane)
     `and(start_at.is.null,due_at.gte."${startUtc}",due_at.lt."${endUtc}")`,
+    // Tomorrow's deadline tasks (for tab switching)
+    `and(start_at.is.null,due_at.gte."${startUtcTomorrow}",due_at.lt."${endUtcTomorrow}")`,
   ].join(',');
 
   const { data: untimedAll = [] } = await supabase
