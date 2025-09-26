@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { fromUTC } from '@/libs/tz';
+import { CheckCircle2 } from 'lucide-react';
 import { Clock, Play, Circle } from 'lucide-react';
 
 type Task = {
@@ -154,11 +155,17 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
   return (
     <div className='rounded-lg border bg-card p-3 text-card-foreground'>
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-        <TabsList className='h-8 p-0.5 bg-muted/70 rounded-md'>
-          <TabsTrigger value='today' className='px-2.5 py-1 text-xs'>今日</TabsTrigger>
-          <TabsTrigger value='tomorrow' className='px-2.5 py-1 text-xs'>明日まで</TabsTrigger>
-          <TabsTrigger value='none' className='px-2.5 py-1 text-xs'>期限なし</TabsTrigger>
-        </TabsList>
+        <div className='flex flex-wrap items-center justify-between gap-2'>
+          <div className='flex items-center gap-1.5 text-[11px] text-muted-foreground'>
+            <CheckCircle2 className='h-3.5 w-3.5' />
+            <span className='font-semibold tracking-wide'>TODO</span>
+          </div>
+          <TabsList className='h-8 p-0.5 bg-muted/70 rounded-md'>
+            <TabsTrigger value='today' className='px-2.5 py-1 text-xs'>Today</TabsTrigger>
+            <TabsTrigger value='tomorrow' className='px-2.5 py-1 text-xs'>Tomorrow</TabsTrigger>
+            <TabsTrigger value='none' className='px-2.5 py-1 text-xs'>No due</TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value={tab} className='mt-2'>
           {filtered.length === 0 ? (
             <div className='text-sm text-muted-foreground'>No tasks.</div>
