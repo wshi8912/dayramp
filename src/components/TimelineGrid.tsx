@@ -253,17 +253,20 @@ export function TimelineGrid({
   return (
     <div className='rounded-lg border bg-card p-3 text-card-foreground'>
       <div className='mb-2 text-xs text-muted-foreground'>Timeline</div>
-      <div className='grid grid-cols-[5rem_1fr] gap-2'>
+      <div className='grid grid-cols-[2.5rem_1fr] md:grid-cols-[4rem_1fr] gap-2'>
         {/* Left hour labels */}
         <div className='relative select-none'>
           <ul className='flex flex-col text-[11px] font-mono font-medium leading-6 text-foreground'>
             {hourRows.map((h) => (
               <li
                 key={`lab-${h.min}`}
-                className='relative flex items-start justify-end pr-2 tabular-nums'
+                className='relative flex items-start justify-end pr-4 md:pr-2 tabular-nums'
                 style={{ height: 60 * PX_PER_MIN }}
               >
-                <span className='sticky top-0 mt-[-6px]'>{h.label}</span>
+                {/* Center the label on the tick line */}
+                <span className='absolute right-1 md:right-2 top-0 -translate-y-1/2 leading-none'>
+                  {h.label}
+                </span>
                 <span className='pointer-events-none absolute right-[-1px] top-0 h-px w-2 bg-border' />
               </li>
             ))}
