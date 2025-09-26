@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mic, Send, X } from 'lucide-react';
 
 type SchemaTask = {
@@ -30,6 +31,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   // Removed result info banner; preview list below is sufficient
   const [text, setText] = useState('');
   const [lastSchema, setLastSchema] = useState<Schema | null>(null);
+  const [mode, setMode] = useState<'voice' | 'text'>('voice');
 
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -326,72 +328,90 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
         </div>
       </div>
 
-      {sending ? (
-        <>
-          <div className='relative h-24 w-24'>
-            <div className='absolute inset-0 rounded-full border-2 border-primary animate-ping' />
-            <div className='absolute inset-2 rounded-full border-2 border-primary/50 animate-pulse' />
-            <div className='absolute inset-4 flex items-center justify-center rounded-full bg-primary/10'>
-              <div className='h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent' />
-            </div>
-          </div>
-          <div className='text-xs text-muted-foreground text-center'>Processing audio…</div>
-        </>
-      ) : !recording ? (
-        <>
-          <Button
-            aria-label='Start voice input'
-            onClick={onStart}
-            disabled={!supported}
-            variant='outline'
-            size='icon'
-            className='h-16 w-16 rounded-full'
-          >
-            <Mic className='h-7 w-7' />
-          </Button>
-          <div className='text-xs text-muted-foreground text-center'>Tap the mic to record</div>
-        </>
-      ) : (
-        <>
-          <div className='text-xs text-muted-foreground text-center'>{`${Math.min(elapsed, 60)}s / 60s`}</div>
-          <div className='flex items-center justify-center gap-4'>
-            <Button aria-label='Cancel' variant='ghost' onClick={onCancel}>
-              <X className='h-5 w-5' />
-            </Button>
-            <Button aria-label='Send now' onClick={onSend} disabled={sending}>
-              <Send className='mr-2 h-4 w-4' />
-              {sending ? 'Sending…' : 'Send Now'}
-            </Button>
-          </div>
-        </>
-      )}
-      {/* Text input below mic */}
-      <div className='mt-2 w-full max-w-xl'>
-        <label htmlFor='quick-text' className='mb-1 block text-xs text-muted-foreground'>
-          Type a task or short brief (Ctrl+Enter to send)
-        </label>
-        <textarea
-          id='quick-text'
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-              e.preventDefault();
-              onSendText();
-            }
-          }}
-          rows={3}
-          placeholder='e.g. 14:00-14:30 meeting with design; submit report by 18:00'
-          className='w-full resize-y rounded-md border bg-background p-2 text-sm outline-none focus:ring-1 focus:ring-ring'
-          disabled={sending}
-        />
-        <div className='mt-2 flex items-center justify-end gap-2'>
-          <Button variant='secondary' type='button' onClick={() => setText('')} disabled={sending || !text.trim()}>
-            Clear
-          </Button>
-          <Button type='button' onClick={onSendText} disabled={sending || !text.trim()}>
-            <Send className='mr-2 h-4 w-4' /> Send Text
-          </Button>
+      {/* Mode toggle and content */}
+      <div className='w-full max-w-xl'>
+        <div className='flex justify-center'>
+          <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
+            <TabsList className='h-8 p-0.5 bg-muted/70 rounded-md'>
+              <TabsTrigger value='voice' className='px-3 py-1 text-xs'>Voice</TabsTrigger>
+              <TabsTrigger value='text' className='px-3 py-1 text-xs'>Text</TabsTrigger>
+            </TabsList>
+            <TabsContent value='voice' className='mt-2'>
+              {sending ? (
+                <div className='flex flex-col items-center gap-2'>
+                  <div className='relative h-16 w-16'>
+                    <div className='absolute inset-0 rounded-full border-2 border-primary animate-ping' />
+                    <div className='absolute inset-1.5 rounded-full border-2 border-primary/50 animate-pulse' />
+                    <div className='absolute inset-3 flex items-center justify-center rounded-full bg-primary/10'>
+                      <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+                    </div>
+                  </div>
+                  <div className='text-xs text-muted-foreground'>Processing…</div>
+                </div>
+              ) : !recording ? (
+                <div className='flex flex-col items-center gap-2'>
+                  <Button
+                    aria-label='Start voice input'
+                    onClick={onStart}
+                    disabled={!supported}
+                    variant='outline'
+                    size='icon'
+                    className='h-16 w-16 rounded-full'
+                  >
+                    <Mic className='h-7 w-7' />
+                  </Button>
+                </div>
+              ) : (
+                <div className='flex flex-col items-center gap-3'>
+                  <div className='text-xs text-muted-foreground'>{`${Math.min(elapsed, 60)}s / 60s`}</div>
+                  <div className='flex items-center justify-center gap-3'>
+                    <Button aria-label='Cancel' variant='ghost' onClick={onCancel}>
+                      <X className='h-5 w-5' />
+                    </Button>
+                    <Button aria-label='Send now' onClick={onSend} disabled={sending}>
+                      <Send className='mr-2 h-4 w-4' />
+                      {sending ? 'Sending…' : 'Send'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            <TabsContent value='text' className='mt-2'>
+              {sending ? (
+                <div className='flex flex-col items-center gap-2'>
+                  <div className='relative h-6 w-6'>
+                    <div className='absolute inset-0 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+                  </div>
+                  <div className='text-xs text-muted-foreground'>Processing…</div>
+                </div>
+              ) : (
+                <div>
+                  <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        onSendText();
+                      }
+                    }}
+                    rows={3}
+                    placeholder='Type a task…'
+                    className='w-full resize-y rounded-md border bg-background p-2 text-sm outline-none focus:ring-1 focus:ring-ring'
+                    disabled={sending}
+                  />
+                  <div className='mt-2 flex items-center justify-end gap-2'>
+                    <Button variant='ghost' type='button' onClick={() => setText('')} disabled={sending || !text.trim()} className='h-8 px-2 text-xs'>
+                      Clear
+                    </Button>
+                    <Button type='button' onClick={onSendText} disabled={sending || !text.trim()} className='h-8 px-3 text-xs'>
+                      <Send className='mr-2 h-3.5 w-3.5' /> Send
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
@@ -423,7 +443,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
         </div>
       )}
       {!supported && (
-        <div className='text-xs text-destructive text-center'>Your browser does not support audio capture.</div>
+        <div className='text-xs text-destructive text-center'>Audio capture not supported.</div>
       )}
       {error && <div className='text-xs text-destructive text-center'>{error}</div>}
       {/* Hide extra banners; list + timeline update are clear enough */}
