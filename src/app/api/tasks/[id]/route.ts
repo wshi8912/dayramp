@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { isTaskStatusDb } from '@/features/tasks/task-status';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 export async function PATCH(
@@ -45,7 +47,15 @@ export async function PATCH(
   if ('dueAt' in body) update.due_at = body.dueAt ?? null;
   if ('estimateMin' in body) update.estimate_min = body.estimateMin ?? null;
   if ('priority' in body) update.priority = body.priority ?? null;
-  if ('status' in body) update.status = body.status ?? null;
+  if ('status' in body) {
+    if (body.status === null || body.status === undefined) {
+      return NextResponse.json({ error: 'Status cannot be empty' }, { status: 400 });
+    }
+    if (!isTaskStatusDb(body.status)) {
+      return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
+    }
+    update.status = body.status;
+  }
   if ('source' in body) update.source = body.source ?? null;
   if ('confidence' in body) update.confidence = body.confidence ?? null;
   if ('entryId' in body) update.entry_id = body.entryId ?? null;
@@ -82,4 +92,3 @@ export async function DELETE(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }
-

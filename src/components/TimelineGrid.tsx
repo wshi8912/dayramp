@@ -1,9 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Clock, Circle, Play } from 'lucide-react';
+
+import { TaskDeleteButton } from '@/components/TaskDeleteButton';
+import { TaskStatusBadge } from '@/components/TaskStatusBadge';
 import { Card } from '@/components/ui/card';
 import { fromUTC, toUTC } from '@/libs/tz';
-import { Clock, Play, Circle } from 'lucide-react';
 
 export type Task = {
   id: string;
@@ -360,7 +363,16 @@ export function TimelineGrid({
                       <div className={`flex items-center gap-1 min-w-0 truncate font-medium leading-tight ${density === 'compact' ? 'text-xs' : 'text-sm'}`}>
                         <IconComponent className={`h-3 w-3 shrink-0 ${density === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3'} text-white/80`} />
                         <span className='truncate'>{t.title}</span>
-                        
+                      </div>
+                      <div className='flex items-center gap-1.5'>
+                        <TaskStatusBadge
+                          taskId={t.id}
+                          status={t.status}
+                          tone='dark'
+                          align='end'
+                          size={density === 'compact' ? 'sm' : 'md'}
+                        />
+                        <TaskDeleteButton taskId={t.id} tone='dark' size={density === 'compact' ? 'sm' : 'md'} />
                       </div>
                     </div>
                     {density !== 'compact' && t.note && (

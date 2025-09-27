@@ -1,9 +1,11 @@
 'use client';
 
-import { fromUTC } from '@/libs/tz';
+import { Clock, Circle, Play } from 'lucide-react';
+
+import { TaskDeleteButton } from '@/components/TaskDeleteButton';
+import { TaskStatusBadge } from '@/components/TaskStatusBadge';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Clock, Play, Circle } from 'lucide-react';
+import { fromUTC } from '@/libs/tz';
 
 type Task = {
   id: string;
@@ -184,23 +186,24 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                             >
                               <div className='flex items-center justify-between gap-3'>
                                 <div className='flex items-center gap-2 min-w-0 truncate text-sm font-medium leading-tight'>
-                                  <IconComponent className={`h-4 w-4 shrink-0 ${
-                                    taskTypeInfo.type === 'deadline' ? 'text-orange-500' :
-                                    taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'text-blue-500' :
-                                    'text-gray-400'
-                                  }`} />
+                                  <IconComponent
+                                    className={`h-4 w-4 shrink-0 ${
+                                      taskTypeInfo.type === 'deadline' ? 'text-orange-500' :
+                                      taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'text-blue-500' :
+                                      'text-gray-400'
+                                    }`}
+                                  />
                                   <span className='truncate'>{t.title}</span>
-                                  {t.status && (
-                                    <Badge variant='secondary' className='ml-2 align-middle text-[10px] uppercase'>
-                                      {t.status}
-                                    </Badge>
+                                </div>
+                                <div className='flex shrink-0 items-center gap-2'>
+                                  <TaskStatusBadge taskId={t.id} status={t.status} align='end' />
+                                  <TaskDeleteButton taskId={t.id} />
+                                  {t.startAt && t.endAt && (
+                                    <div className='font-mono text-[11px] tabular-nums text-muted-foreground'>
+                                      {fmtHM(t.startAt)} → {fmtHM(t.endAt)}
+                                    </div>
                                   )}
                                 </div>
-                                {t.startAt && t.endAt && (
-                                  <div className='shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground'>
-                                    {fmtHM(t.startAt)} → {fmtHM(t.endAt)}
-                                  </div>
-                                )}
                               </div>
                               {t.note && <div className='mt-1 truncate text-xs text-gray-600'>{t.note}</div>}
                             </Card>

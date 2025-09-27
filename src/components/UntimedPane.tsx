@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Card } from '@/components/ui/card';
+import { CheckCircle2, Circle, Clock, Play } from 'lucide-react';
+
+import { TaskDeleteButton } from '@/components/TaskDeleteButton';
+import { TaskStatusBadge } from '@/components/TaskStatusBadge';
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { fromUTC } from '@/libs/tz';
-import { CheckCircle2 } from 'lucide-react';
-import { Clock, Play, Circle } from 'lucide-react';
 
 type Task = {
   id: string;
@@ -258,11 +260,8 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
                             {dueTime} {progress?.overdue ? 'overdue' : 'due'}
                           </Badge>
                         )}
-                        {t.status && (
-                          <Badge variant='secondary' className='shrink-0 text-[10px] uppercase'>
-                            {t.status}
-                          </Badge>
-                        )}
+                        <TaskStatusBadge taskId={t.id} status={t.status} />
+                        <TaskDeleteButton taskId={t.id} />
                       </div>
                     </div>
                     {t.note && <div className='mt-1 truncate text-xs text-gray-600'>{t.note}</div>}

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { isTaskStatusDb } from '@/features/tasks/task-status';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 // GET /api/tasks?from=ISO&to=ISO
@@ -67,6 +69,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'End time cannot be set without a start time' }, { status: 400 });
   }
 
+  if (!isTaskStatusDb(status)) {
+    return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
+  }
+
   const insert = {
     user_id: user.id,
     title,
@@ -86,4 +92,3 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
-

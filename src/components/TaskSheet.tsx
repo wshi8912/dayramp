@@ -1,11 +1,18 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  TASK_STATUSES,
+  TASK_STATUS_LABELS,
+  TaskStatus,
+  normalizeTaskStatus,
+} from '@/features/tasks/task-status';
+import { del, patchJSON } from '@/libs/api';
 import { fromUTC, toUTC } from '@/libs/tz';
-import { patchJSON, del } from '@/libs/api';
 
 type UITask = {
   id: string;
@@ -43,7 +50,7 @@ export function TaskSheet({
   const [title, setTitle] = useState(task?.title || '');
   const [note, setNote] = useState(task?.note || '');
   const [timeType, setTimeType] = useState<TimeType>(initialType);
-  const [status, setStatus] = useState<string>(task?.status || 'todo');
+  const [status, setStatus] = useState<TaskStatus>(() => normalizeTaskStatus(task?.status));
   const [startLocal, setStartLocal] = useState('');
   const [endLocal, setEndLocal] = useState('');
   const [dueLocal, setDueLocal] = useState('');
@@ -53,7 +60,7 @@ export function TaskSheet({
     setTitle(task?.title || '');
     setNote(task?.note || '');
     setTimeType(initialType);
-    setStatus(task?.status || 'todo');
+    setStatus(normalizeTaskStatus(task?.status));
     setStartLocal(task?.startAt ? fromUTC(task.startAt, tz).localISO : '');
     setEndLocal(task?.endAt ? fromUTC(task.endAt, tz).localISO : '');
     setDueLocal(task?.dueAt ? fromUTC(task.dueAt, tz).localISO : '');
@@ -68,7 +75,7 @@ export function TaskSheet({
       const payload: Record<string, any> = {
         title: title.trim(),
         note: note.trim() || null,
-        status: status || 'todo',
+        status,
       };
       if (timeType === 'none') {
         payload.startAt = null;
@@ -163,9 +170,17 @@ export function TaskSheet({
 
             <div className='flex flex-col gap-2'>
               <label className='text-sm'>Status</label>
-              <div className='flex gap-2'>
-                <Button type='button' variant={status === 'todo' ? 'default' : 'outline'} onClick={() => setStatus('todo')}>Todo</Button>
-                <Button type='button' variant={status === 'done' ? 'default' : 'outline'} onClick={() => setStatus('done')}>Done</Button>
+              <div className='flex flex-wrap gap-2'>
+                {TASK_STATUSES.map((value) => (
+                  <Button
+                    key={value}
+                    type='button'
+                    variant={status === value ? 'default' : 'outline'}
+                    onClick={() => setStatus(value)}
+                  >
+                    {TASK_STATUS_LABELS[value]}
+                  </Button>
+                ))}
               </div>
             </div>
 

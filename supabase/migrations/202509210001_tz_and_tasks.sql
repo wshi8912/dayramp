@@ -50,7 +50,7 @@ create table if not exists tasks (
   due_at timestamptz,
   estimate_min int,
   priority text check (priority in ('low','mid','high')),
-  status text check (status in ('todo','done','deleted')) not null default 'todo',
+  status text check (status in ('todo','pending','done','deleted')) not null default 'todo',
   source text check (source in ('voice','manual')) not null,
   confidence numeric,
   created_at timestamptz default now() not null,
