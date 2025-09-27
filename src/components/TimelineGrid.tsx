@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Clock, Circle, Play } from 'lucide-react';
 
 import { TaskDeleteButton } from '@/components/TaskDeleteButton';
-import { TaskStatusBadge } from '@/components/TaskStatusBadge';
 import { Card } from '@/components/ui/card';
 import { fromUTC, toUTC } from '@/libs/tz';
 
@@ -102,6 +101,11 @@ export function TimelineGrid({
       };
     }
   }, []);
+
+  const fmtHM = useCallback(
+    (iso?: string) => (iso ? fromUTC(iso, tz).localISO.slice(11, 16) : ''),
+    [tz]
+  );
 
   useEffect(() => {
     const updateCurrentTime = () => {
@@ -340,6 +344,13 @@ export function TimelineGrid({
                 : isDueOnly
                   ? (isOverdue ? 'bg-red-500' : 'bg-amber-500')
                   : 'bg-primary';
+              const timeLabel = t.startAt && t.endAt
+                ? `${fmtHM(t.startAt)} → ${fmtHM(t.endAt)}`
+                : t.startAt
+                  ? fmtHM(t.startAt)
+                  : t.dueAt
+                    ? `due ${fmtHM(t.dueAt)}`
+                    : '';
               return (
                 <div
                   key={ev.id}
@@ -365,13 +376,11 @@ export function TimelineGrid({
                         <span className='truncate'>{t.title}</span>
                       </div>
                       <div className='flex items-center gap-1.5'>
-                        <TaskStatusBadge
-                          taskId={t.id}
-                          status={t.status}
-                          tone='dark'
-                          align='end'
-                          size={density === 'compact' ? 'sm' : 'md'}
-                        />
+                        {timeLabel && (
+                          <div className='font-mono text-[11px] tabular-nums text-white/70'>
+                            {timeLabel}
+                          </div>
+                        )}
                         <TaskDeleteButton taskId={t.id} tone='dark' size={density === 'compact' ? 'sm' : 'md'} />
                       </div>
                     </div>
