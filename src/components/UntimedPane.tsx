@@ -146,11 +146,32 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
   })();
 
   // Tab-based filtering
+  const counts = useMemo(() => {
+    const summary = { today: 0, tomorrow: 0, none: 0 };
+
+    tasks.forEach((task) => {
+      if (task.dueAt) {
+        const dateKey = fromUTC(task.dueAt, tz).dateKey;
+        if (dateKey === todayKey) summary.today += 1;
+        else if (dateKey === tomorrowKey) summary.tomorrow += 1;
+      } else {
+        summary.none += 1;
+      }
+    });
+
+    return summary;
+  }, [tasks, todayKey, tomorrowKey, tz]);
+
   const filtered = useMemo(() => {
     if (tab === 'none') return sortedTasks.filter((t) => !t.dueAt);
     const key = tab === 'today' ? todayKey : tomorrowKey;
     return sortedTasks.filter((t) => t.dueAt && fromUTC(t.dueAt!, tz).dateKey === key);
   }, [sortedTasks, tab, todayKey, tomorrowKey, tz]);
+
+  const countBadgeClass = (isActive: boolean) =>
+    `inline-flex h-4 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-none transition-colors ${
+      isActive ? 'bg-primary/10 text-primary' : 'bg-muted/60 text-muted-foreground'
+    }`;
 
   return (
     <div className='rounded-lg border bg-card p-3 text-card-foreground'>
@@ -160,10 +181,28 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
             <CheckCircle2 className='h-3.5 w-3.5' />
             <span className='font-semibold tracking-wide'>TODO</span>
           </div>
-          <TabsList className='h-8 p-0.5 bg-muted/70 rounded-md'>
-            <TabsTrigger value='today' className='px-2.5 py-1 text-xs'>Today</TabsTrigger>
-            <TabsTrigger value='tomorrow' className='px-2.5 py-1 text-xs'>Tomorrow</TabsTrigger>
-            <TabsTrigger value='none' className='px-2.5 py-1 text-xs'>No due</TabsTrigger>
+          <TabsList className='rounded-md bg-muted/70 p-0.5'>
+            <TabsTrigger
+              value='today'
+              className='flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium tracking-tight transition data-[state=active]:bg-background data-[state=active]:shadow-sm'
+            >
+              <span>Today</span>
+              <span className={countBadgeClass(tab === 'today')}>{counts.today}</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value='tomorrow'
+              className='flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium tracking-tight transition data-[state=active]:bg-background data-[state=active]:shadow-sm'
+            >
+              <span>Tomorrow</span>
+              <span className={countBadgeClass(tab === 'tomorrow')}>{counts.tomorrow}</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value='none'
+              className='flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium tracking-tight transition data-[state=active]:bg-background data-[state=active]:shadow-sm'
+            >
+              <span>No due</span>
+              <span className={countBadgeClass(tab === 'none')}>{counts.none}</span>
+            </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value={tab} className='mt-2'>
