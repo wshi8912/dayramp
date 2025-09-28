@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { TASK_KIND_LABELS, TASK_KINDS, TaskKind, normalizeTaskKind } from '@/features/tasks/task-kind';
 import {
   TASK_STATUSES,
   TASK_STATUS_LABELS,
@@ -22,6 +23,7 @@ type UITask = {
   endAt?: string;
   dueAt?: string;
   status?: string;
+  kind?: 'task' | 'event';
 };
 
 type TimeType = 'none' | 'range' | 'deadline';
@@ -41,6 +43,7 @@ export function TaskSheet({
 }) {
   const initialType: TimeType = useMemo(() => {
     if (!task) return 'none';
+    if (task.kind === 'event') return 'range';
     if (task.startAt && task.endAt) return 'range';
     if (task.dueAt) return 'deadline';
     if (task.startAt) return 'range';
@@ -51,6 +54,7 @@ export function TaskSheet({
   const [note, setNote] = useState(task?.note || '');
   const [timeType, setTimeType] = useState<TimeType>(initialType);
   const [status, setStatus] = useState<TaskStatus>(() => normalizeTaskStatus(task?.status));
+  const [kind, setKind] = useState<TaskKind>(() => normalizeTaskKind(task?.kind));
   const [startLocal, setStartLocal] = useState('');
   const [endLocal, setEndLocal] = useState('');
   const [dueLocal, setDueLocal] = useState('');
@@ -61,12 +65,36 @@ export function TaskSheet({
     setNote(task?.note || '');
     setTimeType(initialType);
     setStatus(normalizeTaskStatus(task?.status));
+    setKind(normalizeTaskKind(task?.kind));
     setStartLocal(task?.startAt ? fromUTC(task.startAt, tz).localISO : '');
     setEndLocal(task?.endAt ? fromUTC(task.endAt, tz).localISO : '');
     setDueLocal(task?.dueAt ? fromUTC(task.dueAt, tz).localISO : '');
   }, [task, tz, initialType]);
 
-  const canSave = title.trim().length > 0 && !!task;
+  useEffect(() => {
+    if (kind === 'event') {
+      setTimeType('range');
+      setDueLocal('');
+    }
+  }, [kind]);
+
+  useEffect(() => {
+    if (kind === 'event' && status === 'todo') {
+      setStatus('pending');
+    }
+  }, [kind, status]);
+
+  const canSave = useMemo(() => {
+    if (!task) return false;
+    if (title.trim().length === 0) return false;
+    if (kind === 'event') {
+      return !!startLocal && !!endLocal;
+    }
+    if (timeType === 'range') {
+      return !endLocal || !!startLocal;
+    }
+    return true;
+  }, [task, title, kind, startLocal, endLocal, timeType]);
 
   const onSave = async () => {
     if (!task || !canSave || saving) return;
@@ -76,8 +104,18 @@ export function TaskSheet({
         title: title.trim(),
         note: note.trim() || null,
         status,
+        kind,
       };
-      if (timeType === 'none') {
+      if (kind === 'event') {
+        if (!startLocal || !endLocal) {
+          alert('Events require both start and end times');
+          setSaving(false);
+          return;
+        }
+        payload.startAt = toUTC(startLocal, tz);
+        payload.endAt = toUTC(endLocal, tz);
+        payload.dueAt = null;
+      } else if (timeType === 'none') {
         payload.startAt = null;
         payload.endAt = null;
         payload.dueAt = null;
@@ -86,7 +124,7 @@ export function TaskSheet({
         if (!startLocal && endLocal) {
           alert('End time cannot be set without a start time');
           setSaving(false);
-          return;
+            return;
         }
         payload.startAt = startLocal ? toUTC(startLocal, tz) : null;
         // Only set endAt if startAt exists
@@ -142,13 +180,29 @@ export function TaskSheet({
             </div>
 
             <div className='flex flex-col gap-2'>
-              <label className='text-sm'>Time</label>
+              <label className='text-sm'>Type</label>
               <div className='flex gap-2'>
-                <Button type='button' variant={timeType === 'none' ? 'default' : 'outline'} onClick={() => setTimeType('none')}>None</Button>
-                <Button type='button' variant={timeType === 'range' ? 'default' : 'outline'} onClick={() => setTimeType('range')}>Range</Button>
-                <Button type='button' variant={timeType === 'deadline' ? 'default' : 'outline'} onClick={() => setTimeType('deadline')}>Deadline</Button>
+                {TASK_KINDS.map((option) => (
+                  <Button
+                    key={option}
+                    type='button'
+                    variant={kind === option ? 'default' : 'outline'}
+                    onClick={() => {
+                      setKind(option);
+                      if (option === 'event' && status === 'todo') {
+                        setStatus('pending');
+                      }
+                    }}
+                  >
+                    {TASK_KIND_LABELS[option]}
+                  </Button>
+                ))}
               </div>
-              {timeType === 'range' && (
+            </div>
+
+            <div className='flex flex-col gap-2'>
+              <label className='text-sm'>Time</label>
+              {kind === 'event' ? (
                 <div className='grid grid-cols-1 gap-2 md:grid-cols-2'>
                   <div className='flex flex-col gap-2'>
                     <label className='text-xs text-muted-foreground'>Start ({tz})</label>
@@ -159,12 +213,32 @@ export function TaskSheet({
                     <Input type='datetime-local' value={endLocal} onChange={(e) => setEndLocal(e.target.value)} />
                   </div>
                 </div>
-              )}
-              {timeType === 'deadline' && (
-                <div className='flex flex-col gap-2'>
-                  <label className='text-xs text-muted-foreground'>Due ({tz})</label>
-                  <Input type='datetime-local' value={dueLocal} onChange={(e) => setDueLocal(e.target.value)} />
-                </div>
+              ) : (
+                <>
+                  <div className='flex gap-2'>
+                    <Button type='button' variant={timeType === 'none' ? 'default' : 'outline'} onClick={() => setTimeType('none')}>None</Button>
+                    <Button type='button' variant={timeType === 'range' ? 'default' : 'outline'} onClick={() => setTimeType('range')}>Range</Button>
+                    <Button type='button' variant={timeType === 'deadline' ? 'default' : 'outline'} onClick={() => setTimeType('deadline')}>Deadline</Button>
+                  </div>
+                  {timeType === 'range' && (
+                    <div className='grid grid-cols-1 gap-2 md:grid-cols-2'>
+                      <div className='flex flex-col gap-2'>
+                        <label className='text-xs text-muted-foreground'>Start ({tz})</label>
+                        <Input type='datetime-local' value={startLocal} onChange={(e) => setStartLocal(e.target.value)} />
+                      </div>
+                      <div className='flex flex-col gap-2'>
+                        <label className='text-xs text-muted-foreground'>End ({tz})</label>
+                        <Input type='datetime-local' value={endLocal} onChange={(e) => setEndLocal(e.target.value)} />
+                      </div>
+                    </div>
+                  )}
+                  {timeType === 'deadline' && (
+                    <div className='flex flex-col gap-2'>
+                      <label className='text-xs text-muted-foreground'>Due ({tz})</label>
+                      <Input type='datetime-local' value={dueLocal} onChange={(e) => setDueLocal(e.target.value)} />
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

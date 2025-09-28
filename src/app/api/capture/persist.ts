@@ -1,4 +1,5 @@
 import { toUTC } from '@/libs/tz';
+
 import type { Schema } from './types';
 
 export async function saveEntryAndTasks(
@@ -52,6 +53,7 @@ export async function saveEntryAndTasks(
       start_at: startAt,
       end_at: endAt,
       due_at: dueAt,
+      kind: 'task',
       estimate_min: t.estimateMin ?? null,
       priority: t.priority ?? null,
       status: 'todo',
@@ -72,4 +74,3 @@ export async function saveEntryAndTasks(
   }
   return { entryId: entry.id, taskIds: createdIds, count: createdIds.length };
 }
-

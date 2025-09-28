@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Clock, Circle, Play } from 'lucide-react';
+import { Calendar, Clock, Circle, Play } from 'lucide-react';
 
 import { TaskDeleteButton } from '@/components/TaskDeleteButton';
 import { Card } from '@/components/ui/card';
@@ -15,6 +15,7 @@ export type Task = {
   dueAt?: string;
   note?: string;
   status?: string;
+  kind: 'task' | 'event';
 };
 
 export type TimelineGridProps = {
@@ -75,6 +76,13 @@ export function TimelineGrid({
   }, [currentMin]);
 
   const getTaskTypeInfo = useCallback((task: Task) => {
+    if (task.kind === 'event') {
+      return {
+        icon: Calendar,
+        color: 'border-violet-200 bg-violet-50/30',
+        type: 'event'
+      };
+    }
     if (task.dueAt && !task.startAt) {
       return {
         icon: Clock,
@@ -144,6 +152,21 @@ export function TimelineGrid({
       const eInfo = t.endAt ? fromUTC(t.endAt, tz) : undefined;
       const dInfo = t.dueAt ? fromUTC(t.dueAt, tz) : undefined;
 
+      if (t.kind === 'event') {
+        if (!sInfo || !eInfo) continue;
+        const sDay = sInfo.dateKey;
+        const eDay = eInfo.dateKey;
+        const sMin = minOfDayFromLocalISO(sInfo.localISO);
+        const eMin = minOfDayFromLocalISO(eInfo.localISO);
+        const overlaps = sDay === dayKey || eDay === dayKey || (sDay < dayKey && eDay > dayKey);
+        if (!overlaps) continue;
+        const startMin = sDay < dayKey ? 0 : sDay > dayKey ? 24 * 60 : Math.max(0, Math.min(24 * 60, sMin));
+        const endMin = eDay > dayKey ? 24 * 60 : eDay < dayKey ? 0 : Math.max(0, Math.min(24 * 60, eMin));
+        if (endMin <= startMin) continue;
+        arr.push({ id: t.id, src: t, startMin, endMin });
+        continue;
+      }
+
       // Due-only marker: include only if due date is dayKey
       if (!sInfo && !eInfo && dInfo) {
         if (dInfo.dateKey !== dayKey) continue;
@@ -176,18 +199,15 @@ export function TimelineGrid({
           if (clippedEnd <= clippedStart) continue;
           arr.push({ id: t.id, src: t, startMin: clippedStart, endMin: clippedEnd });
         } else {
-          // Start-only: include only if it belongs to the day
-          if (sDay !== dayKey) continue;
-          const startMin = Math.max(0, Math.min(24 * 60, sMin));
-          const endMin = Math.max(startMin + 1, Math.min(24 * 60, sMin + defaultDurationMin));
-          arr.push({ id: t.id, src: t, startMin, endMin });
+          // Start-only tasks do not produce calendar blocks
+          continue;
         }
       }
     }
     // Sort by start; for equal start, longer first to stabilize layout
     arr.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
     return arr;
-  }, [tasks, tz, dayKey, minOfDayFromLocalISO, defaultDurationMin]);
+  }, [tasks, tz, dayKey, minOfDayFromLocalISO]);
 
   const { layout, groupCols } = useMemo(() => {
     const active: { id: string; endMin: number; col: number }[] = [];
@@ -339,11 +359,13 @@ export function TimelineGrid({
               const isOverdue = isDueOnly && t.dueAt ? (new Date(t.dueAt).getTime() < Date.now()) : false;
               const taskTypeInfo = getTaskTypeInfo(t);
               const IconComponent = taskTypeInfo.icon;
-              const dotColor = t.status === 'done'
-                ? 'bg-muted-foreground'
-                : isDueOnly
-                  ? (isOverdue ? 'bg-red-500' : 'bg-amber-500')
-                  : 'bg-primary';
+              const dotColor = t.kind === 'event'
+                ? 'bg-violet-400'
+                : t.status === 'done'
+                  ? 'bg-muted-foreground'
+                  : isDueOnly
+                    ? (isOverdue ? 'bg-red-500' : 'bg-amber-500')
+                    : 'bg-primary';
               const timeLabel = t.startAt && t.endAt
                 ? `${fmtHM(t.startAt)} → ${fmtHM(t.endAt)}`
                 : t.startAt
@@ -362,6 +384,7 @@ export function TimelineGrid({
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); onSelect?.(t); }}
                     className={`relative cursor-pointer rounded-md ${density === 'compact' ? 'p-1' : 'p-2'} shadow-sm transition-colors hover:bg-accent/30 ${
+                      taskTypeInfo.type === 'event' ? 'bg-violet-600 border-violet-700 text-white' :
                       taskTypeInfo.type === 'deadline' ? 'bg-orange-600 border-orange-700 text-white' :
                       taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'bg-blue-600 border-blue-700 text-white' :
                       'bg-gray-600 border-gray-700 text-white'

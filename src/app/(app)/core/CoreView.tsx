@@ -1,16 +1,18 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+
+import { Calendar, List } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+
+import { AddTaskButton } from '@/components/AddTaskButton';
 import { CaptureBar } from '@/components/CaptureBar';
+import { TaskSheet } from '@/components/TaskSheet';
 import { Timeline } from '@/components/Timeline';
 import { TimelineGrid } from '@/components/TimelineGrid';
 import { UntimedPane } from '@/components/UntimedPane';
-import { AddTaskButton } from '@/components/AddTaskButton';
-import { TaskSheet } from '@/components/TaskSheet';
-import { postJSON } from '@/libs/api';
 import { Button } from '@/components/ui/button';
-import { Calendar, List } from 'lucide-react';
+import { postJSON } from '@/libs/api';
 
 export type UITask = {
   id: string;
@@ -20,6 +22,7 @@ export type UITask = {
   endAt?: string;
   dueAt?: string;
   status?: string;
+  kind: 'task' | 'event';
 };
 
 export function CoreView({
@@ -62,6 +65,7 @@ export function CoreView({
         endAt: endUtc,
         status: 'todo',
         source: 'manual',
+        kind: 'task',
       });
       const ui: UITask = {
         id: created.id,
@@ -71,6 +75,7 @@ export function CoreView({
         endAt: created.end_at ?? undefined,
         dueAt: created.due_at ?? undefined,
         status: created.status ?? 'todo',
+        kind: created.kind ?? 'task',
       };
       setSelected(ui);
       setOpen(true);

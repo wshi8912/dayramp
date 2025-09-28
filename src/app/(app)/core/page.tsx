@@ -1,6 +1,7 @@
-import { CoreView } from './CoreView';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { toUTC, userDayUtcRange } from '@/libs/tz';
+
+import { CoreView } from './CoreView';
 
 export default async function CorePage({
   searchParams,
@@ -34,14 +35,12 @@ export default async function CorePage({
 
   // Fetch tasks for calendar display (scheduled tasks + deadline tasks for today)
   const calendarOr = [
-    // Tasks starting today
-    `and(start_at.gte."${startUtc}",start_at.lt."${endUtc}")`,
-    // Tasks ending today
-    `and(end_at.gte."${startUtc}",end_at.lt."${endUtc}")`,
-    // Tasks overlapping today (multi-day events)
-    `and(start_at.lt."${endUtc}",end_at.gte."${startUtc}")`,
-    // Tasks due today (deadline only)
-    `and(due_at.gte."${startUtc}",due_at.lt."${endUtc}")`,
+    // Events overlapping the window
+    `and(kind.eq.event,start_at.lt."${endUtc}",end_at.gte."${startUtc}")`,
+    // Task timeboxes overlapping the window
+    `and(kind.eq.task,start_at.not.is.null,end_at.not.is.null,start_at.lt."${endUtc}",end_at.gte."${startUtc}")`,
+    // Task deadlines landing today (no schedule)
+    `and(kind.eq.task,start_at.is.null,end_at.is.null,due_at.not.is.null,due_at.gte."${startUtc}",due_at.lt."${endUtc}")`
   ].join(',');
 
   const { data: tasks = [] } = await supabase
@@ -68,6 +67,7 @@ export default async function CorePage({
     .from('tasks')
     .select('*')
     .eq('user_id', user?.id || '')
+    .eq('kind', 'task')
     .or(untimedOr)
     .neq('status', 'deleted')
     .order('created_at', { ascending: false });
@@ -75,8 +75,9 @@ export default async function CorePage({
   // Map DB -> UI props for calendar (scheduled + deadlines)
   const timed = (tasks || [])
     .filter((t: any) =>
-      (t.start_at && t.end_at) || // Scheduled range
-      (!t.start_at && t.due_at)   // Deadline only
+      (t.kind === 'event' && t.start_at && t.end_at) ||
+      (t.kind === 'task' && t.start_at && t.end_at) ||
+      (t.kind === 'task' && !t.start_at && !t.end_at && t.due_at)
     )
     .map((t: any) => ({
       id: t.id,
@@ -85,7 +86,8 @@ export default async function CorePage({
       startAt: t.start_at ?? undefined,
       endAt: t.end_at ?? undefined,
       dueAt: t.due_at ?? undefined,
-      status: t.status
+      status: t.status,
+      kind: t.kind === 'event' ? 'event' : 'task'
     }));
 
   // Map upper pane tasks
@@ -96,7 +98,8 @@ export default async function CorePage({
       note: t.note ?? undefined,
       startAt: t.start_at ?? undefined,  // Include for display
       dueAt: t.due_at ?? undefined,      // Include for display
-      status: t.status
+      status: t.status,
+      kind: 'task'
     }));
 
   return (

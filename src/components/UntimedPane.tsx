@@ -17,6 +17,7 @@ type Task = {
   status?: string;
   startAt?: string;
   dueAt?: string;
+  kind?: 'task' | 'event';
 };
 
 // Circular progress component for deadline tasks

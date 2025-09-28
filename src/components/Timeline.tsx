@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Circle, Play } from 'lucide-react';
+import { Calendar, Clock, Circle, Play } from 'lucide-react';
 
 import { TaskDeleteButton } from '@/components/TaskDeleteButton';
 import { TaskStatusBadge } from '@/components/TaskStatusBadge';
@@ -15,14 +15,21 @@ type Task = {
   dueAt?: string;
   note?: string;
   status?: string;
+  kind: 'task' | 'event';
 };
 
 export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; onSelect?: (t: Task) => void }) {
-  const fmt = (iso?: string) => (iso ? fromUTC(iso, tz).localISO.replace('T', ' ') : '');
   const fmtHM = (iso?: string) => (iso ? fromUTC(iso, tz).localISO.slice(11, 16) : '');
   const timeKey = (t: Task) => t.startAt || t.dueAt || '';
 
   const getTaskTypeInfo = (task: Task) => {
+    if (task.kind === 'event') {
+      return {
+        icon: Calendar,
+        color: 'border-violet-200 bg-violet-50/30',
+        type: 'event'
+      };
+    }
     if (task.dueAt && !task.startAt) {
       return {
         icon: Clock,
@@ -82,7 +89,7 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
       const hasDue = !!t.dueAt;
       const startMin = hasStart ? toMinutes(t.startAt)! : hasDue ? toMinutes(t.dueAt)! : 0;
       const endMin = hasStart && hasEnd ? toMinutes(t.endAt)! : startMin;
-      const isDueOnly = hasDue && !hasStart && !hasEnd;
+      const isDueOnly = t.kind === 'task' && hasDue && !hasStart && !hasEnd;
       const label = hasStart ? fmtHM(t.startAt) : hasDue ? `due ${fmtHM(t.dueAt)}` : '';
       return { task: t, startMin, endMin, label, isDueOnly };
     })
@@ -132,6 +139,7 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                     const overlapLift = idx === 0 ? 0 : 8; // px to overlap upward for visual stacking
                     const taskTypeInfo = getTaskTypeInfo(t);
                     const IconComponent = taskTypeInfo.icon;
+                    const showStatus = t.kind === 'task';
 
                     return (
                       <div
@@ -150,6 +158,7 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                             <div className='flex items-center gap-2 min-w-0 truncate text-sm font-medium leading-tight'>
                               <IconComponent
                                 className={`h-4 w-4 shrink-0 ${
+                                  taskTypeInfo.type === 'event' ? 'text-violet-600' :
                                   taskTypeInfo.type === 'deadline' ? 'text-orange-500' :
                                   taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'text-blue-500' :
                                   'text-gray-400'
@@ -158,7 +167,7 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                               <span className='truncate'>{t.title}</span>
                             </div>
                             <div className='flex shrink-0 items-center gap-2'>
-                              <TaskStatusBadge taskId={t.id} status={t.status} align='end' />
+                              {showStatus && <TaskStatusBadge taskId={t.id} status={t.status} align='end' />}
                               <TaskDeleteButton taskId={t.id} />
                               {t.startAt && t.endAt && (
                                 <div className='font-mono text-[11px] tabular-nums text-muted-foreground'>
