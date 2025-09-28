@@ -16,6 +16,17 @@ export async function POST(_request: NextRequest) {
     return NextResponse.json({ error: 'Not available' }, { status: 403 });
   }
 
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey || serviceRoleKey.split('.').length !== 3) {
+    return NextResponse.json(
+      {
+        error:
+          'Missing or invalid SUPABASE_SERVICE_ROLE_KEY. Copy the service_role key from supabase/.env or the Supabase dashboard into .env.local and restart the dev server.'
+      },
+      { status: 500 }
+    );
+  }
+
   const todayKey = formatInTimeZone(new Date(), TOKYO_TZ, 'yyyy-MM-dd');
 
   const seeds: Array<{
@@ -161,6 +172,15 @@ export async function POST(_request: NextRequest) {
     .like('note', `${DEV_NOTE_PREFIX}%`);
 
   if (deleteError) {
+    if (deleteError.message?.includes('JWSError')) {
+      return NextResponse.json(
+        {
+          error:
+            'Supabase rejected the service role key (JWSError). Verify SUPABASE_SERVICE_ROLE_KEY in .env.local matches your local Supabase service_role key.'
+        },
+        { status: 500 }
+      );
+    }
     return NextResponse.json({ error: deleteError.message }, { status: 500 });
   }
 
@@ -170,6 +190,15 @@ export async function POST(_request: NextRequest) {
     .select('id, title, kind, status');
 
   if (error) {
+    if (error.message?.includes('JWSError')) {
+      return NextResponse.json(
+        {
+          error:
+            'Supabase rejected the service role key (JWSError). Verify SUPABASE_SERVICE_ROLE_KEY in .env.local matches your local Supabase service_role key.'
+        },
+        { status: 500 }
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
