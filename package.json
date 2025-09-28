@@ -28,7 +28,8 @@
     "db:diff": "supabase db diff --linked",
     "db:remote-commit": "supabase db remote commit",
     "db:lint": "supabase db lint",
-    "db:dump": "supabase db dump -f schema.sql"
+    "db:dump": "supabase db dump -f schema.sql",
+    "dev:seed:today": "node scripts/dev-seed-today.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.32",
