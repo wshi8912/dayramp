@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mic, Send, X } from 'lucide-react';
+import { CalendarClock, ListTodo, Mic, Send, X } from 'lucide-react';
+import { cn } from '@/utils/cn';
 
 type SchemaTask = {
   kind: 'task' | 'event';
@@ -33,6 +35,22 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [text, setText] = useState('');
   const [lastSchema, setLastSchema] = useState<Schema | null>(null);
   const [mode, setMode] = useState<'voice' | 'text'>('voice');
+
+  const parsedCount = lastSchema?.tasks?.length ?? 0;
+  const previewHeader = parsedCount ? `Added ${parsedCount} ${parsedCount === 1 ? 'item' : 'items'}` : 'Awaiting structured items';
+  const previewDateLabel = useMemo(() => {
+    if (!lastSchema) return '';
+    if (!lastSchema.date) return lastSchema.timezone;
+    try {
+      const label = new Intl.DateTimeFormat('en-US', {
+        dateStyle: 'medium',
+        timeZone: lastSchema.timezone,
+      }).format(new Date(`${lastSchema.date}T00:00:00`));
+      return `${label} • ${lastSchema.timezone}`;
+    } catch {
+      return `${lastSchema.date} • ${lastSchema.timezone}`;
+    }
+  }, [lastSchema]);
 
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -418,37 +436,127 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
 
       {/* Structured result preview */}
       {lastSchema && (
-        <div className='mt-2 w-full max-w-xl rounded-md border bg-background p-3'>
-          {lastSchema.tasks?.length ? (
-            <ul className='space-y-2'>
-              {lastSchema.tasks.map((t, i) => (
-                <li key={i} className='rounded-md border p-2'>
-                  <div className='font-medium'>{t.title}</div>
-                  <div className='text-xs text-muted-foreground'>
-                    {(() => {
-                      const parts: Array<string> = [];
-                      parts.push(t.kind);
-                      if (t.time?.type === 'range' && (t.time.startLocal || t.time.endLocal)) {
-                        const range = `${t.time.startLocal || ''}${t.time.startLocal || t.time.endLocal ? ' → ' : ''}${t.time.endLocal || ''}`;
-                        parts.push(range.trim() || 'time range');
-                      } else if (t.time?.type === 'deadline' && t.time.dueLocal) {
-                        parts.push(`due ${t.time.dueLocal}`);
-                      } else {
-                        parts.push('no time');
-                      }
-                      if (t.estimateMin) parts.push(`est ${t.estimateMin}m`);
-                      if (t.priority) parts.push(t.priority);
-                      if (typeof t.confidence === 'number') parts.push(`conf ${Math.round(t.confidence * 100)}%`);
-                      return parts.join(' • ');
-                    })()}
-                  </div>
-                  {t.note && <div className='mt-1 text-xs'>{t.note}</div>}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className='text-sm text-muted-foreground'>No tasks parsed.</div>
-          )}
+        <div className='mt-4 w-full max-w-2xl'>
+          <div className='rounded-2xl border border-muted bg-background/80 p-4 shadow-sm backdrop-blur'>
+            <div className='flex flex-wrap items-center justify-between gap-3 border-b border-muted-foreground/10 pb-3'>
+              <div>
+                <p className='text-xs uppercase tracking-wide text-muted-foreground'>LLM capture preview</p>
+                <p className='text-sm font-medium text-foreground'>{previewHeader}</p>
+                <p className='text-xs text-muted-foreground'>{previewDateLabel || lastSchema.timezone}</p>
+              </div>
+              <Badge className='border-emerald-200 bg-emerald-500/15 text-emerald-600'>Added</Badge>
+            </div>
+            {lastSchema.tasks?.length ? (
+              <ul className='mt-4 space-y-3'>
+                {lastSchema.tasks.map((t, i) => {
+                  const isEvent = t.kind === 'event';
+                  const toTime = (value?: string) => (value ? value.slice(11, 16) : '');
+                  const timeLabel = (() => {
+                    if (!t.time) return 'Unscheduled';
+                    if (t.time.type === 'range') {
+                      const start = toTime(t.time.startLocal);
+                      const end = toTime(t.time.endLocal);
+                      if (start && end) return `${start} → ${end}`;
+                      if (start) return `${start} start`;
+                      if (end) return `Until ${end}`;
+                      return 'Scheduled';
+                    }
+                    if (t.time.type === 'deadline') {
+                      const due = toTime(t.time.dueLocal);
+                      return due ? `Due ${due}` : 'Due today';
+                    }
+                    return 'Unscheduled';
+                  })();
+                  const chips: Array<{ key: string; label: string; tone: 'time' | 'estimate' | 'priority' | 'confidence' }> = [];
+                  if (timeLabel) chips.push({ key: 'time', label: timeLabel, tone: 'time' });
+                  if (t.estimateMin) chips.push({ key: 'estimate', label: `~${t.estimateMin}m`, tone: 'estimate' });
+                  if (t.priority) {
+                    const title = `${t.priority.charAt(0).toUpperCase()}${t.priority.slice(1)} priority`;
+                    chips.push({ key: 'priority', label: title, tone: 'priority' });
+                  }
+                  if (typeof t.confidence === 'number') {
+                    chips.push({
+                      key: 'confidence',
+                      label: `${Math.round(t.confidence * 100)}% confidence`,
+                      tone: 'confidence',
+                    });
+                  }
+                  const chipClass = (tone: 'time' | 'estimate' | 'priority' | 'confidence') => {
+                    if (tone === 'time') {
+                      return isEvent ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700';
+                    }
+                    if (tone === 'estimate') return 'bg-amber-100 text-amber-700';
+                    if (tone === 'priority') return 'bg-violet-100 text-violet-700';
+                    return 'bg-slate-100 text-slate-600';
+                  };
+                  return (
+                    <li
+                      key={`${t.title}-${i}`}
+                      className={cn(
+                        'relative overflow-hidden rounded-xl border bg-card/80 p-4 shadow-sm transition-shadow hover:shadow-md',
+                        isEvent ? 'border-sky-200/80 hover:border-sky-300/80' : 'border-emerald-200/80 hover:border-emerald-300/80'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'absolute inset-y-0 left-0 w-1 rounded-r-full',
+                          isEvent ? 'bg-sky-400/80' : 'bg-emerald-500/80'
+                        )}
+                      />
+                      <div className='flex items-start gap-3'>
+                        <div
+                          className={cn(
+                            'flex h-10 w-10 items-center justify-center rounded-full',
+                            isEvent ? 'bg-sky-100 text-sky-600' : 'bg-emerald-100 text-emerald-600'
+                          )}
+                        >
+                          {isEvent ? <CalendarClock className='h-5 w-5' /> : <ListTodo className='h-5 w-5' />}
+                        </div>
+                        <div className='flex-1'>
+                          <div className='flex items-start justify-between gap-3'>
+                            <div>
+                              <div className='text-sm font-semibold tracking-tight text-foreground'>{t.title}</div>
+                              {t.note && <div className='mt-1 text-xs text-muted-foreground'>{t.note}</div>}
+                            </div>
+                            <Badge
+                              variant='outline'
+                              className={cn(
+                                'uppercase tracking-wide',
+                                isEvent
+                                  ? 'border-sky-200 bg-sky-50 text-sky-700'
+                                  : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                              )}
+                            >
+                              {isEvent ? 'Event' : 'Task'}
+                            </Badge>
+                          </div>
+                          {chips.length > 0 && (
+                            <div className='mt-3 flex flex-wrap gap-2'>
+                              {chips.map((chip) => (
+                                <span
+                                  key={`${chip.key}-${i}`}
+                                  className={cn(
+                                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                    chipClass(chip.tone)
+                                  )}
+                                >
+                                  {chip.label}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div className='mt-4 rounded-lg border border-dashed border-muted-foreground/30 bg-background/60 p-4 text-sm text-muted-foreground'>
+                No structured tasks detected. Try adding more detail about what you need to get done.
+              </div>
+            )}
+          </div>
         </div>
       )}
       {!supported && (
