@@ -31,6 +31,7 @@ export async function saveEntryAndTasks(
     let startAt = null;
     let endAt = null;
     let dueAt = null;
+    const kind = t.kind === 'event' ? 'event' : 'task';
 
     if (t.time?.type === 'range') {
       if (t.time.startLocal) {
@@ -41,7 +42,7 @@ export async function saveEntryAndTasks(
         }
       }
       // If no startLocal, ignore endLocal (validation: end_at cannot exist without start_at)
-    } else if (t.time?.type === 'deadline' && t.time.dueLocal) {
+    } else if (t.time?.type === 'deadline' && t.time.dueLocal && kind !== 'event') {
       dueAt = toUTC(t.time.dueLocal, tz);
     }
 
@@ -53,10 +54,10 @@ export async function saveEntryAndTasks(
       start_at: startAt,
       end_at: endAt,
       due_at: dueAt,
-      kind: 'task',
+      kind,
       estimate_min: t.estimateMin ?? null,
       priority: t.priority ?? null,
-      status: 'todo',
+      status: kind === 'event' ? 'pending' : 'todo',
       source: hadAudio ? 'voice' : 'manual',
       confidence: t.confidence ?? null,
     };

@@ -1,4 +1,5 @@
 export type SchemaTask = {
+  kind: 'task' | 'event';
   title: string;
   note?: string;
   time: {
@@ -18,4 +19,3 @@ export type Schema = {
   tasks: SchemaTask[];
   language: 'ja' | 'en';
 };
-

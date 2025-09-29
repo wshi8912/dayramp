@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mic, Send, X } from 'lucide-react';
 
 type SchemaTask = {
+  kind: 'task' | 'event';
   title: string;
   note?: string;
   time: { type: 'range' | 'deadline' | 'none'; startLocal?: string; endLocal?: string; dueLocal?: string };
@@ -424,14 +425,22 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                 <li key={i} className='rounded-md border p-2'>
                   <div className='font-medium'>{t.title}</div>
                   <div className='text-xs text-muted-foreground'>
-                    {t.time?.type === 'range' && (t.time.startLocal || t.time.endLocal)
-                      ? `${t.time.startLocal || ''}${t.time.startLocal || t.time.endLocal ? ' → ' : ''}${t.time.endLocal || ''}`
-                      : t.time?.type === 'deadline' && t.time.dueLocal
-                      ? `due ${t.time.dueLocal}`
-                      : 'no time'}
-                    {t.estimateMin ? ` • est ${t.estimateMin}m` : ''}
-                    {t.priority ? ` • ${t.priority}` : ''}
-                    {typeof t.confidence === 'number' ? ` • conf ${Math.round(t.confidence * 100)}%` : ''}
+                    {(() => {
+                      const parts: Array<string> = [];
+                      parts.push(t.kind);
+                      if (t.time?.type === 'range' && (t.time.startLocal || t.time.endLocal)) {
+                        const range = `${t.time.startLocal || ''}${t.time.startLocal || t.time.endLocal ? ' → ' : ''}${t.time.endLocal || ''}`;
+                        parts.push(range.trim() || 'time range');
+                      } else if (t.time?.type === 'deadline' && t.time.dueLocal) {
+                        parts.push(`due ${t.time.dueLocal}`);
+                      } else {
+                        parts.push('no time');
+                      }
+                      if (t.estimateMin) parts.push(`est ${t.estimateMin}m`);
+                      if (t.priority) parts.push(t.priority);
+                      if (typeof t.confidence === 'number') parts.push(`conf ${Math.round(t.confidence * 100)}%`);
+                      return parts.join(' • ');
+                    })()}
                   </div>
                   {t.note && <div className='mt-1 text-xs'>{t.note}</div>}
                 </li>
