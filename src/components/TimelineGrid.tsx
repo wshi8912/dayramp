@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Calendar, Clock, Circle, Play } from 'lucide-react';
+import { Calendar, Circle, Clock, Play } from 'lucide-react';
 
 import { TaskDeleteButton } from '@/components/TaskDeleteButton';
 import { Card } from '@/components/ui/card';
@@ -63,7 +63,10 @@ export function TimelineGrid({
   const endHour = Math.max(startHour + 1, Math.min(24, dayEndHour)); // ensure at least 1 hour
   const VISIBLE_START_MIN = startHour * 60;
   const VISIBLE_END_MIN = endHour * 60;
-  const VISIBLE_TOTAL_MIN = Math.max(1, VISIBLE_END_MIN - VISIBLE_START_MIN);
+  const EXTRA_AFTER_MIDNIGHT_MIN = 120; // keep cards near 24:00 fully visible by extending view to +2h
+  const paddedVisibleEndMin = VISIBLE_END_MIN + EXTRA_AFTER_MIDNIGHT_MIN;
+  const paddedVisibleTotalMin = Math.max(1, paddedVisibleEndMin - VISIBLE_START_MIN);
+  const paddedEndHour = Math.ceil(paddedVisibleEndMin / 60);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Current time indicator
@@ -238,20 +241,33 @@ export function TimelineGrid({
     return { layout, groupCols };
   }, [spans]);
 
+  const formatHourLabel = useCallback((hour: number) => {
+    if (hour < 24) {
+      return `${String(hour).padStart(2, '0')}:00`;
+    }
+    const baseHour = hour % 24;
+    const daysAhead = Math.floor(hour / 24);
+    return `${String(baseHour).padStart(2, '0')}:00 +${daysAhead}`;
+  }, []);
+
   const hourRows = useMemo(() => {
     const list: { label: string; min: number }[] = [];
-    for (let hour = startHour; hour < endHour; hour += 1) {
-      const label = `${String(hour).padStart(2, '0')}:00`;
-      list.push({ label, min: hour * 60 });
+    for (let hour = startHour; hour < paddedEndHour; hour += 1) {
+      list.push({ label: formatHourLabel(hour), min: hour * 60 });
     }
     return list;
-  }, [startHour, endHour]);
+  }, [formatHourLabel, startHour, paddedEndHour]);
 
   const hourMarks = useMemo(() => {
     const mins: number[] = [];
-    for (let hour = startHour; hour <= endHour; hour += 1) mins.push(hour * 60);
+    for (let hour = startHour; hour <= paddedEndHour; hour += 1) {
+      mins.push(hour * 60);
+    }
+    if (!mins.includes(paddedVisibleEndMin)) {
+      mins.push(paddedVisibleEndMin);
+    }
     return mins;
-  }, [startHour, endHour]);
+  }, [startHour, paddedEndHour, paddedVisibleEndMin]);
 
   const onGridClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -308,7 +324,7 @@ export function TimelineGrid({
             ref={containerRef}
             onClick={onGridClick}
             className='relative rounded-md border bg-background/50'
-            style={{ height: VISIBLE_TOTAL_MIN * PX_PER_MIN, overflow: 'hidden' }}
+            style={{ height: paddedVisibleTotalMin * PX_PER_MIN, overflow: 'hidden' }}
           >
             {/* Hour lines */}
             {hourMarks.map((min) => {
@@ -320,7 +336,7 @@ export function TimelineGrid({
             {/* Half-hour minor lines */}
             {hourRows.map((h) => {
               const top = (h.min + 30 - VISIBLE_START_MIN) * PX_PER_MIN;
-              if (h.min + 30 > VISIBLE_END_MIN) return null;
+              if (h.min + 30 > paddedVisibleEndMin) return null;
               return (
                 <div key={`ml-${h.min}`} className='absolute left-0 right-0 h-px bg-muted' style={{ top, opacity: 0.4 }} />
               );
