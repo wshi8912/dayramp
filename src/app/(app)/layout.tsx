@@ -1,7 +1,6 @@
 import { PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
 
-import { BackgroundGradient } from '@/components/background-gradient';
 import { Logo } from '@/components/logo';
 import { getSession } from '@/features/account/controllers/get-session';
 
@@ -16,7 +15,7 @@ export default async function ProjectsLayout({ children }: PropsWithChildren) {
 
   return (
     <>
-      <BackgroundGradient force='light' />
+      <div className='fixed inset-0 -z-10 bg-white' aria-hidden />
       <div className='m-auto flex h-full max-w-[1440px] flex-col px-4'>
         <header className='flex items-center justify-between py-8'>
           <Logo />

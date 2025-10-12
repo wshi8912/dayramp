@@ -323,7 +323,7 @@ export function TimelineGrid({
           <div
             ref={containerRef}
             onClick={onGridClick}
-            className='relative rounded-md border bg-background/50'
+            className='relative rounded-md border bg-card'
             style={{ height: paddedVisibleTotalMin * PX_PER_MIN, overflow: 'hidden' }}
           >
             {/* Hour lines */}

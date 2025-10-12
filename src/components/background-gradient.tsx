@@ -32,20 +32,18 @@ export function BackgroundGradient({ force }: { force?: Variant }) {
     );
   }
 
-  if (variant === 'light') {
-    return (
-      <div className="fixed inset-0 -z-10" aria-hidden>
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100" />
-      </div>
-    );
-  }
+  const gradients: Record<Exclude<Variant, 'star'>, string> = {
+    light: 'from-[#fff7ed] via-[#fcdc94]/80 to-[#c8cfa0]/70',
+    orange: 'from-[#7a4b12] via-[#ef9c66]/90 to-[#fcdc94]',
+    green: 'from-[#1c3532] via-[#264542] to-[#78aba8]',
+    sky: 'from-[#78aba8] via-[#c8cfa0] to-[#fff7ed]',
+  };
 
-  const cls =
-    variant === 'orange'
-      ? 'from-amber-800 via-orange-900 to-orange-950'
-      : variant === 'green'
-      ? 'from-emerald-800 via-emerald-900 to-emerald-950'
-      : 'from-sky-800 via-sky-900 to-sky-950';
+  const gradientClasses = gradients[variant] ?? gradients.light;
 
-  return <div className={`fixed inset-0 -z-10 bg-gradient-to-br ${cls}`} aria-hidden />;
+  return (
+    <div className="fixed inset-0 -z-10" aria-hidden>
+      <div className={`absolute inset-0 bg-gradient-to-br ${gradientClasses}`} />
+    </div>
+  );
 }

@@ -2,6 +2,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 
+import { BackgroundGradient } from '@/components/background-gradient';
 import { Button } from '@/components/ui/button';
 import { InstallAppButton } from '@/components/install-app-button';
 import { LoginSuccessMessage } from '@/components/login-success-message';
@@ -9,6 +10,7 @@ import { LoginSuccessMessage } from '@/components/login-success-message';
 export default function HomePage() {
   return (
     <>
+      <BackgroundGradient force='light' />
       <Suspense fallback={null}>
         <LoginSuccessMessage />
       </Suspense>
