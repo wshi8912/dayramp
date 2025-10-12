@@ -9,7 +9,7 @@
 
 @layer base {
   :root {
-    --background: 44 38% 94%;
+    --background: 44 40% 97%;
     /* Soft dune backdrop */
     --foreground: 202 32% 27%;
     /* Deep steel-blue text */
@@ -59,7 +59,7 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 44 38% 94%;
+    --sidebar-background: 44 40% 97%;
     /* Match body background */
     --sidebar-foreground: 202 32% 27%;
     /* Steel-blue sidebar text */
@@ -174,6 +174,9 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
+    background-color: hsl(var(--background));
+    background-image: radial-gradient(120% 120% at 0% -20%, hsl(var(--primary) / 0.16), transparent 55%), radial-gradient(120% 120% at 100% 0%, hsl(var(--secondary) / 0.14), hsl(var(--background)) 65%);
+    background-attachment: fixed;
   }
 
   html {
@@ -182,6 +185,10 @@
 
   body {
     @apply h-full;
+  }
+
+  html.dark body {
+    background-image: radial-gradient(110% 110% at 0% -10%, hsl(var(--primary) / 0.22), transparent 55%), radial-gradient(120% 120% at 100% 0%, hsl(var(--secondary) / 0.18), hsl(var(--background)) 65%);
   }
 
   a {
