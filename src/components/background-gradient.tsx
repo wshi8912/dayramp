@@ -33,10 +33,10 @@ export function BackgroundGradient({ force }: { force?: Variant }) {
   }
 
   const gradients: Record<Exclude<Variant, 'star'>, string> = {
-    light: 'from-[#f2efe7] via-[#9acbd0]/45 to-[#f2efe7]',
-    orange: 'from-[#f2efe7] via-[#48a6a7]/40 to-[#f2efe7]',
-    green: 'from-[#f2efe7] via-[#48a6a7]/35 to-[#f2efe7]',
-    sky: 'from-[#f2efe7] via-[#9acbd0]/40 to-[#f2efe7]',
+    light: 'from-[#f6f3eb] via-[#bdcdd6]/55 to-[#f6f3eb]',
+    orange: 'from-[#f6f3eb] via-[#6096b4]/35 to-[#f6f3eb]',
+    green: 'from-[#f6f3eb] via-[#93bfcf]/45 to-[#f6f3eb]',
+    sky: 'from-[#f6f3eb] via-[#bdcdd6]/45 to-[#93bfcf]/40',
   };
 
   const gradientClasses = gradients[variant] ?? gradients.light;
