@@ -4,154 +4,154 @@
 
 @layer base {
   :root {
-    --background: 33 100% 96%;
-    /* Soft peach wash */
-    --foreground: 173 31% 16%;
-    /* Deep teal for readable text */
+    --background: 44 30% 93%;
+    /* Light sand backdrop */
+    --foreground: 185 30% 20%;
+    /* Deep teal text */
 
-    --muted: 79 42% 91%;
-    /* Sage-tinted surface */
-    --muted-foreground: 176 21% 31%;
-    /* Dusty teal for muted text */
+    --muted: 186 36% 88%;
+    /* Misty aqua surface */
+    --muted-foreground: 185 25% 32%;
+    /* Subdued teal text */
 
     --popover: 0 0% 100%;
-    /* Neutral white popovers */
-    --popover-foreground: 173 31% 16%;
-    /* Match body text for popovers */
+    /* Neutral popovers */
+    --popover-foreground: 185 30% 20%;
+    /* Match body text on popovers */
 
-    --border: 180 29% 91%;
-    /* Pale aqua border */
-    --input: 180 29% 91%;
+    --border: 44 20% 88%;
+    /* Whisper-light border */
+    --input: 44 20% 88%;
     /* Input outline aligned with border */
 
     --card: 0 0% 100%;
     /* Crisp white cards */
-    --card-foreground: 173 31% 16%;
+    --card-foreground: 185 30% 20%;
     /* Teal card text */
 
-    --primary: 176 23% 57%;
-    /* Pastel teal primary */
-    --primary-foreground: 33 100% 96%;
-    /* Light text on teal */
+    --primary: 184 100% 22%;
+    /* Deep teal primary */
+    --primary-foreground: 0 0% 100%;
+    /* White text on primary */
 
-    --secondary: 24 81% 67%;
-    /* Sunset apricot secondary */
-    --secondary-foreground: 22 65% 16%;
-    /* Toasted brown text */
+    --secondary: 181 40% 47%;
+    /* Mid teal secondary */
+    --secondary-foreground: 0 0% 100%;
+    /* White text on secondary */
 
-    --accent: 42 95% 78%;
-    /* Honey accent */
-    --accent-foreground: 33 74% 27%;
-    /* Caramel accent text */
+    --accent: 186 36% 71%;
+    /* Pale aqua accent */
+    --accent-foreground: 185 26% 25%;
+    /* Dark teal accent text */
 
     --destructive: 0 84% 60%;
     /* Keep vivid red for errors */
     --destructive-foreground: 210 40% 98%;
     /* Light text on destructive */
 
-    --ring: 176 23% 57%;
+    --ring: 184 100% 22%;
     /* Ring aligned with primary */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 48 74% 86%;
-    /* Soft pistachio sidebar */
-    --sidebar-foreground: 173 31% 16%;
+    --sidebar-background: 44 30% 93%;
+    /* Match body background */
+    --sidebar-foreground: 185 30% 20%;
     /* Teal sidebar text */
 
-    --sidebar-primary: 176 23% 57%;
-    /* Teal sidebar primary */
-    --sidebar-primary-foreground: 33 100% 96%;
-    /* Light text on sidebar primary */
+    --sidebar-primary: 184 100% 22%;
+    /* Deep teal sidebar primary */
+    --sidebar-primary-foreground: 0 0% 100%;
+    /* White text on sidebar primary */
 
-    --sidebar-accent: 42 95% 88%;
-    /* Warm accent surface */
-    --sidebar-accent-foreground: 173 31% 16%;
-    /* Teal accent text */
+    --sidebar-accent: 186 36% 71%;
+    /* Aqua sidebar accent */
+    --sidebar-accent-foreground: 185 26% 25%;
+    /* Dark teal accent text */
 
-    --sidebar-border: 180 29% 91%;
-    /* Pale aqua sidebar border */
+    --sidebar-border: 44 20% 88%;
+    /* Subtle sidebar border */
 
-    --sidebar-ring: 176 23% 57%;
+    --sidebar-ring: 184 100% 22%;
     /* Teal sidebar ring */
   }
 
   .dark {
-    --background: 173 31% 16%;
-    /* Deep teal night mode */
-    --foreground: 33 100% 96%;
-    /* Light typography on dark */
+    --background: 186 63% 11%;
+    /* Inky teal night */
+    --foreground: 44 30% 93%;
+    /* Light sand typography */
 
-    --muted: 174 29% 21%;
-    /* Shadowed teal surfaces */
-    --muted-foreground: 69 33% 72%;
-    /* Herbal muted text */
+    --muted: 186 46% 16%;
+    /* Deep aqua surfaces */
+    --muted-foreground: 186 36% 71%;
+    /* Soft aqua text */
 
-    --popover: 174 29% 21%;
+    --popover: 186 63% 11%;
     /* Dark popovers */
-    --popover-foreground: 33 100% 96%;
+    --popover-foreground: 44 30% 93%;
     /* Light popover text */
 
-    --border: 176 21% 31%;
-    /* Smoky teal borders */
-    --input: 176 21% 31%;
+    --border: 185 44% 22%;
+    /* Dim teal borders */
+    --input: 185 44% 22%;
     /* Inputs aligned with borders */
 
-    --card: 174 29% 21%;
+    --card: 186 63% 11%;
     /* Dark card background */
-    --card-foreground: 33 100% 96%;
+    --card-foreground: 44 30% 93%;
     /* Light card text */
 
-    --primary: 24 81% 67%;
-    /* Warm highlight in dark */
-    --primary-foreground: 22 65% 16%;
-    /* Toasted text on warm highlight */
+    --primary: 181 40% 47%;
+    /* Mid teal primary */
+    --primary-foreground: 0 0% 100%;
+    /* White text on primary */
 
-    --secondary: 176 23% 57%;
-    /* Teal secondary */
-    --secondary-foreground: 33 100% 96%;
-    /* Light text on teal */
+    --secondary: 186 36% 71%;
+    /* Pale aqua secondary */
+    --secondary-foreground: 186 63% 11%;
+    /* Deep teal text on secondary */
 
-    --accent: 42 95% 78%;
-    /* Honey accent */
-    --accent-foreground: 22 65% 16%;
-    /* Toasted accent text */
+    --accent: 186 36% 71%;
+    /* Aqua accent */
+    --accent-foreground: 186 63% 11%;
+    /* Deep teal accent text */
 
     --destructive: 0 63% 31%;
     /* Darkened red for destructive */
-    --destructive-foreground: 33 100% 96%;
+    --destructive-foreground: 44 30% 93%;
     /* Light text on destructive */
 
-    --ring: 42 95% 78%;
+    --ring: 181 40% 47%;
     /* Accent ring */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 174 29% 21%;
-    /* Dark sidebar */
-    --sidebar-foreground: 69 33% 72%;
-    /* Herbal sidebar text */
+    --sidebar-background: 186 46% 16%;
+    /* Deep teal sidebar */
+    --sidebar-foreground: 186 36% 71%;
+    /* Aqua sidebar text */
 
-    --sidebar-primary: 42 95% 78%;
-    /* Honey sidebar highlight */
-    --sidebar-primary-foreground: 22 65% 16%;
-    /* Toasted text on highlight */
+    --sidebar-primary: 181 40% 47%;
+    /* Mid teal sidebar highlight */
+    --sidebar-primary-foreground: 0 0% 100%;
+    /* White text on highlight */
 
-    --sidebar-accent: 176 23% 57%;
-    /* Teal sidebar accent */
-    --sidebar-accent-foreground: 33 100% 96%;
-    /* Light text on teal accent */
+    --sidebar-accent: 186 36% 71%;
+    /* Aqua sidebar accent */
+    --sidebar-accent-foreground: 186 63% 11%;
+    /* Deep teal accent text */
 
-    --sidebar-border: 176 21% 31%;
-    /* Muted teal border */
+    --sidebar-border: 185 44% 22%;
+    /* Subtle teal border */
 
-    --sidebar-ring: 42 95% 78%;
-    /* Accent ring */
+    --sidebar-ring: 181 40% 47%;
+    /* Teal sidebar ring */
   }
 
   ::selection {
-    color: hsl(33 100% 96%);
-    background-color: hsl(176 23% 57% / 0.85);
+    color: hsl(0 0% 100%);
+    background-color: hsl(184 100% 22% / 0.85);
   }
 
   *:focus-visible {

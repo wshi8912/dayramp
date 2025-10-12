@@ -15,7 +15,11 @@ export default async function ProjectsLayout({ children }: PropsWithChildren) {
 
   return (
     <>
-      <div className='fixed inset-0 -z-10 bg-white' aria-hidden />
+      <div
+        className='fixed inset-0 -z-10'
+        aria-hidden
+        style={{ backgroundColor: 'hsl(var(--background))' }}
+      />
       <div className='m-auto flex h-full max-w-[1440px] flex-col px-4'>
         <header className='flex items-center justify-between py-8'>
           <Logo />
