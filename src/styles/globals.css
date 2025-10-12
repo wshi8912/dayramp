@@ -79,6 +79,46 @@
 
     --sidebar-ring: 201 41% 38%;
     /* Ocean sidebar ring */
+
+    --calendar-event-surface: 271 73% 97%;
+    --calendar-event-surface-accent: 268 63% 92%;
+    --calendar-event-border: 269 42% 82%;
+    --calendar-event-ink: 272 44% 34%;
+    --calendar-event-dot: 270 94% 58%;
+    --calendar-event-chip-bg: 270 100% 96%;
+    --calendar-event-chip-border: 269 52% 78%;
+    --calendar-event-chip-ink: 272 40% 40%;
+
+    --calendar-scheduled-surface: 201 78% 96%;
+    --calendar-scheduled-surface-accent: 199 66% 90%;
+    --calendar-scheduled-border: 200 55% 82%;
+    --calendar-scheduled-ink: 202 50% 32%;
+    --calendar-scheduled-dot: 201 88% 46%;
+    --calendar-scheduled-chip-bg: 201 92% 95%;
+    --calendar-scheduled-chip-border: 201 60% 78%;
+    --calendar-scheduled-chip-ink: 202 54% 34%;
+
+    --calendar-deadline-surface: 28 88% 96%;
+    --calendar-deadline-surface-accent: 28 92% 91%;
+    --calendar-deadline-border: 27 66% 82%;
+    --calendar-deadline-ink: 24 82% 40%;
+    --calendar-deadline-dot: 26 94% 50%;
+    --calendar-deadline-chip-bg: 28 100% 95%;
+    --calendar-deadline-chip-border: 26 68% 74%;
+    --calendar-deadline-chip-ink: 24 80% 40%;
+
+    --calendar-unscheduled-surface: 206 23% 96%;
+    --calendar-unscheduled-surface-accent: 206 23% 92%;
+    --calendar-unscheduled-border: 207 20% 84%;
+    --calendar-unscheduled-ink: 208 16% 40%;
+    --calendar-unscheduled-dot: 207 20% 46%;
+    --calendar-unscheduled-chip-bg: 207 24% 95%;
+    --calendar-unscheduled-chip-border: 207 18% 82%;
+    --calendar-unscheduled-chip-ink: 208 16% 38%;
+
+    --calendar-overdue-chip-bg: 0 84% 96%;
+    --calendar-overdue-chip-border: 0 74% 78%;
+    --calendar-overdue-chip-ink: 0 82% 42%;
   }
 
   .dark {
@@ -152,6 +192,46 @@
 
     --sidebar-ring: 201 36% 48%;
     /* Highlight sidebar ring */
+
+    --calendar-event-surface: 268 44% 20%;
+    --calendar-event-surface-accent: 268 48% 26%;
+    --calendar-event-border: 269 56% 42%;
+    --calendar-event-ink: 275 62% 86%;
+    --calendar-event-dot: 270 88% 70%;
+    --calendar-event-chip-bg: 268 46% 26%;
+    --calendar-event-chip-border: 269 56% 46%;
+    --calendar-event-chip-ink: 275 64% 88%;
+
+    --calendar-scheduled-surface: 201 38% 20%;
+    --calendar-scheduled-surface-accent: 201 42% 25%;
+    --calendar-scheduled-border: 201 52% 38%;
+    --calendar-scheduled-ink: 196 58% 84%;
+    --calendar-scheduled-dot: 200 72% 68%;
+    --calendar-scheduled-chip-bg: 201 42% 24%;
+    --calendar-scheduled-chip-border: 201 55% 44%;
+    --calendar-scheduled-chip-ink: 196 62% 86%;
+
+    --calendar-deadline-surface: 18 58% 20%;
+    --calendar-deadline-surface-accent: 18 64% 24%;
+    --calendar-deadline-border: 18 70% 40%;
+    --calendar-deadline-ink: 20 82% 86%;
+    --calendar-deadline-dot: 16 85% 64%;
+    --calendar-deadline-chip-bg: 18 64% 24%;
+    --calendar-deadline-chip-border: 18 72% 42%;
+    --calendar-deadline-chip-ink: 20 82% 86%;
+
+    --calendar-unscheduled-surface: 205 22% 20%;
+    --calendar-unscheduled-surface-accent: 205 24% 24%;
+    --calendar-unscheduled-border: 205 28% 38%;
+    --calendar-unscheduled-ink: 204 26% 82%;
+    --calendar-unscheduled-dot: 204 28% 60%;
+    --calendar-unscheduled-chip-bg: 205 24% 24%;
+    --calendar-unscheduled-chip-border: 205 30% 42%;
+    --calendar-unscheduled-chip-ink: 204 30% 84%;
+
+    --calendar-overdue-chip-bg: 0 72% 26%;
+    --calendar-overdue-chip-border: 0 78% 46%;
+    --calendar-overdue-chip-ink: 15 92% 88%;
   }
 
   ::selection {
@@ -203,5 +283,139 @@
   .mobile-nav-sheet {
     background-color: hsl(var(--sidebar-background)) !important;
     /* Use !important for testing */
+  }
+}
+
+@layer components {
+  .calendar-tone {
+    border-width: 1px;
+    border-style: solid;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+
+  .calendar-tone--event {
+    border-color: hsl(var(--calendar-event-border));
+    background-color: hsl(var(--calendar-event-surface) / 0.92);
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--calendar-event-surface) / 0.92),
+      hsl(var(--calendar-event-surface-accent) / 0.88)
+    );
+    color: hsl(var(--calendar-event-ink));
+  }
+
+  .calendar-tone--scheduled {
+    border-color: hsl(var(--calendar-scheduled-border));
+    background-color: hsl(var(--calendar-scheduled-surface) / 0.92);
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--calendar-scheduled-surface) / 0.92),
+      hsl(var(--calendar-scheduled-surface-accent) / 0.88)
+    );
+    color: hsl(var(--calendar-scheduled-ink));
+  }
+
+  .calendar-tone--deadline {
+    border-color: hsl(var(--calendar-deadline-border));
+    background-color: hsl(var(--calendar-deadline-surface) / 0.92);
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--calendar-deadline-surface) / 0.92),
+      hsl(var(--calendar-deadline-surface-accent) / 0.88)
+    );
+    color: hsl(var(--calendar-deadline-ink));
+  }
+
+  .calendar-tone--unscheduled {
+    border-color: hsl(var(--calendar-unscheduled-border));
+    background-color: hsl(var(--calendar-unscheduled-surface) / 0.94);
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--calendar-unscheduled-surface) / 0.94),
+      hsl(var(--calendar-unscheduled-surface-accent) / 0.9)
+    );
+    color: hsl(var(--calendar-unscheduled-ink));
+  }
+
+  .calendar-icon {
+    transition: color 160ms ease;
+  }
+
+  .calendar-icon--event {
+    color: hsl(var(--calendar-event-ink));
+  }
+
+  .calendar-icon--scheduled {
+    color: hsl(var(--calendar-scheduled-ink));
+  }
+
+  .calendar-icon--deadline {
+    color: hsl(var(--calendar-deadline-ink));
+  }
+
+  .calendar-icon--unscheduled {
+    color: hsl(var(--calendar-unscheduled-ink));
+  }
+
+  .calendar-dot {
+    border-radius: 9999px;
+  }
+
+  .calendar-dot--event {
+    background-color: hsl(var(--calendar-event-dot));
+  }
+
+  .calendar-dot--scheduled {
+    background-color: hsl(var(--calendar-scheduled-dot));
+  }
+
+  .calendar-dot--deadline {
+    background-color: hsl(var(--calendar-deadline-dot));
+  }
+
+  .calendar-dot--unscheduled {
+    background-color: hsl(var(--calendar-unscheduled-dot));
+  }
+
+  .calendar-dot--overdue {
+    background-color: hsl(0 84% 60%);
+  }
+
+  .calendar-chip {
+    border-width: 1px;
+    border-style: solid;
+    background-color: hsl(var(--calendar-unscheduled-chip-bg));
+    border-color: hsl(var(--calendar-unscheduled-chip-border));
+    color: hsl(var(--calendar-unscheduled-chip-ink));
+  }
+
+  .calendar-chip--event {
+    background-color: hsl(var(--calendar-event-chip-bg));
+    border-color: hsl(var(--calendar-event-chip-border));
+    color: hsl(var(--calendar-event-chip-ink));
+  }
+
+  .calendar-chip--scheduled {
+    background-color: hsl(var(--calendar-scheduled-chip-bg));
+    border-color: hsl(var(--calendar-scheduled-chip-border));
+    color: hsl(var(--calendar-scheduled-chip-ink));
+  }
+
+  .calendar-chip--deadline {
+    background-color: hsl(var(--calendar-deadline-chip-bg));
+    border-color: hsl(var(--calendar-deadline-chip-border));
+    color: hsl(var(--calendar-deadline-chip-ink));
+  }
+
+  .calendar-chip--unscheduled {
+    background-color: hsl(var(--calendar-unscheduled-chip-bg));
+    border-color: hsl(var(--calendar-unscheduled-chip-border));
+    color: hsl(var(--calendar-unscheduled-chip-ink));
+  }
+
+  .calendar-chip--overdue {
+    background-color: hsl(var(--calendar-overdue-chip-bg));
+    border-color: hsl(var(--calendar-overdue-chip-border));
+    color: hsl(var(--calendar-overdue-chip-ink));
   }
 }

@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Calendar, Circle, Clock, Play } from 'lucide-react';
 
 import { TaskDeleteButton } from '@/components/TaskDeleteButton';
 import { Card } from '@/components/ui/card';
 import { fromUTC, toUTC } from '@/libs/tz';
+import { resolveCalendarTheme } from '@/utils/calendar-theme';
+import { cn } from '@/utils/cn';
 
 export type Task = {
   id: string;
@@ -77,41 +78,6 @@ export function TimelineGrid({
     const mm = String(currentMin % 60).padStart(2, '0');
     return `${hh}:${mm}`;
   }, [currentMin]);
-
-  const getTaskTypeInfo = useCallback((task: Task) => {
-    if (task.kind === 'event') {
-      return {
-        icon: Calendar,
-        color: 'border-violet-200 bg-violet-50/30',
-        type: 'event'
-      };
-    }
-    if (task.dueAt && !task.startAt) {
-      return {
-        icon: Clock,
-        color: 'border-orange-200 bg-orange-50/30',
-        type: 'deadline'
-      };
-    } else if (task.startAt && task.endAt) {
-      return {
-        icon: Play,
-        color: 'border-blue-200 bg-blue-50/30',
-        type: 'scheduled'
-      };
-    } else if (task.startAt && !task.endAt) {
-      return {
-        icon: Play,
-        color: 'border-blue-200 bg-blue-50/30',
-        type: 'start-only'
-      };
-    } else {
-      return {
-        icon: Circle,
-        color: 'border-gray-200 bg-gray-50/30',
-        type: 'unscheduled'
-      };
-    }
-  }, []);
 
   const fmtHM = useCallback(
     (iso?: string) => (iso ? fromUTC(iso, tz).localISO.slice(11, 16) : ''),
@@ -373,15 +339,13 @@ export function TimelineGrid({
               const t = ev.src;
               const isDueOnly = !!t.dueAt && !t.startAt && !t.endAt;
               const isOverdue = isDueOnly && t.dueAt ? (new Date(t.dueAt).getTime() < Date.now()) : false;
-              const taskTypeInfo = getTaskTypeInfo(t);
-              const IconComponent = taskTypeInfo.icon;
-              const dotColor = t.kind === 'event'
-                ? 'bg-violet-400'
-                : t.status === 'done'
-                  ? 'bg-muted-foreground'
-                  : isDueOnly
-                    ? (isOverdue ? 'bg-red-500' : 'bg-amber-500')
-                    : 'bg-primary';
+              const theme = resolveCalendarTheme(t);
+              const IconComponent = theme.icon;
+              const dotClass = cn(
+                theme.dotClass,
+                t.status === 'done' && 'bg-muted-foreground',
+                isDueOnly && isOverdue && 'calendar-dot--overdue'
+              );
               const timeLabel = t.startAt && t.endAt
                 ? `${fmtHM(t.startAt)} → ${fmtHM(t.endAt)}`
                 : t.startAt
@@ -399,32 +363,43 @@ export function TimelineGrid({
                     role='button'
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); onSelect?.(t); }}
-                    className={`relative cursor-pointer rounded-md ${density === 'compact' ? 'p-1' : 'p-2'} shadow-sm transition-colors hover:bg-accent/30 ${
-                      taskTypeInfo.type === 'event' ? 'bg-violet-600 border-violet-700 text-white' :
-                      taskTypeInfo.type === 'deadline' ? 'bg-orange-600 border-orange-700 text-white' :
-                      taskTypeInfo.type === 'scheduled' || taskTypeInfo.type === 'start-only' ? 'bg-blue-600 border-blue-700 text-white' :
-                      'bg-gray-600 border-gray-700 text-white'
-                    } ${isDueOnly ? 'opacity-90' : ''} ${isDueOnly && isOverdue ? 'ring-2 ring-red-400' : ''}`}
+                    className={cn(
+                      'relative cursor-pointer rounded-md',
+                      density === 'compact' ? 'p-1' : 'p-2',
+                      'shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                      theme.cardClass,
+                      isDueOnly && 'opacity-90',
+                      isDueOnly && isOverdue && 'ring-1 ring-red-400/60 ring-offset-1 ring-offset-background'
+                    )}
                     style={{ height }}
                   >
                     {/* leading dot */}
-                    <span className={`absolute left-1 top-1 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dotColor}`} />
+                    <span className={cn('absolute left-1 top-1 h-2.5 w-2.5 ring-2 ring-background', dotClass)} />
                     <div className='ml-4 flex items-center justify-between gap-2'>
-                      <div className={`flex items-center gap-1 min-w-0 truncate font-medium leading-tight ${density === 'compact' ? 'text-xs' : 'text-sm'}`}>
-                        <IconComponent className={`h-3 w-3 shrink-0 ${density === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3'} text-white/80`} />
+                      <div className={cn(
+                        'flex items-center gap-1 min-w-0 truncate font-medium leading-tight',
+                        density === 'compact' ? 'text-xs' : 'text-sm'
+                      )}>
+                        <IconComponent
+                          className={cn(
+                            'shrink-0',
+                            density === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3',
+                            theme.iconClass
+                          )}
+                        />
                         <span className='truncate'>{t.title}</span>
                       </div>
                       <div className='flex items-center gap-1.5'>
                         {timeLabel && (
-                          <div className='font-mono text-[11px] tabular-nums text-white/70'>
+                          <div className='font-mono text-[11px] tabular-nums text-foreground/70'>
                             {timeLabel}
                           </div>
                         )}
-                        <TaskDeleteButton taskId={t.id} tone='dark' size={density === 'compact' ? 'sm' : 'md'} />
+                        <TaskDeleteButton taskId={t.id} size={density === 'compact' ? 'sm' : 'md'} />
                       </div>
                     </div>
                     {density !== 'compact' && t.note && (
-                      <div className='mt-1 truncate text-xs text-white/70 ml-4'>{t.note}</div>
+                      <div className='mt-1 ml-4 truncate text-xs text-foreground/70'>{t.note}</div>
                     )}
                   </Card>
                 </div>

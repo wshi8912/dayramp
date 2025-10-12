@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Circle, Clock, Play } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 import { TaskDeleteButton } from '@/components/TaskDeleteButton';
 import { TaskStatusBadge } from '@/components/TaskStatusBadge';
@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { fromUTC } from '@/libs/tz';
+import { resolveCalendarTheme } from '@/utils/calendar-theme';
+import { cn } from '@/utils/cn';
 
 type Task = {
   id: string;
@@ -114,28 +116,6 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
     return { progress, color, overdue: false } as const;
   };
 
-  const getTaskTypeInfo = (task: Task) => {
-    if (task.dueAt && !task.startAt) {
-      return {
-        icon: Clock,
-        color: 'border-orange-200 bg-orange-50/30',
-        type: 'deadline'
-      };
-    } else if (task.startAt && !task.dueAt) {
-      return {
-        icon: Play,
-        color: 'border-blue-200 bg-blue-50/30',
-        type: 'start-only'
-      };
-    } else {
-      return {
-        icon: Circle,
-        color: 'border-gray-200 bg-gray-50/30',
-        type: 'unscheduled'
-      };
-    }
-  };
-
   // Sort helper: deadline-first by ascending dueAt, then others.
   const sortedTasks: Task[] = (() => {
     const withDue = tasks.filter((t) => !!t.dueAt);
@@ -216,8 +196,8 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
               {filtered.map((t) => {
                 const startTime = formatTime(t.startAt);
                 const dueTime = formatTime(t.dueAt);
-                const taskTypeInfo = getTaskTypeInfo(t);
-                const IconComponent = taskTypeInfo.icon;
+                const theme = resolveCalendarTheme(t);
+                const IconComponent = theme.icon;
                 // Avoid SSR/client mismatches: compute time-dependent UI only after mount
                 const progress = mounted && t.dueAt ? calculateProgress(t.dueAt) : null;
 
@@ -227,19 +207,18 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
                     role='button'
                     tabIndex={0}
                     onClick={() => onSelect?.(t)}
-                    className={`cursor-pointer rounded-md p-3 shadow-sm transition-colors hover:bg-accent/30 ${taskTypeInfo.color}`}
+                    className={cn(
+                      'cursor-pointer rounded-md p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                      theme.cardClass
+                    )}
                   >
                     <div className='flex items-center justify-between gap-2'>
                       <div className='flex items-center gap-2 truncate text-sm font-medium leading-tight'>
-                        <IconComponent className={`h-4 w-4 shrink-0 ${
-                          taskTypeInfo.type === 'deadline' ? 'text-orange-500' :
-                          taskTypeInfo.type === 'start-only' ? 'text-blue-500' :
-                          'text-gray-400'
-                        }`} />
+                        <IconComponent className={cn('h-4 w-4 shrink-0', theme.iconClass)} />
                         <span className='truncate'>{t.title}</span>
                       </div>
                       <div className='flex items-center gap-2'>
-                        {progress && taskTypeInfo.type === 'deadline' && (
+                        {progress && theme.visualKey === 'deadline' && (
                           <CircularProgress
                             progress={progress.progress}
                             color={progress.color}
@@ -247,16 +226,21 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
                           />
                         )}
                         {startTime && !t.dueAt && (
-                          <Badge variant='outline' className='shrink-0 text-[10px]'>
+                          <Badge
+                            variant='outline'
+                            className={cn('shrink-0 text-[10px]', 'calendar-chip', 'calendar-chip--scheduled')}
+                          >
                             {startTime} start
                           </Badge>
                         )}
                         {dueTime && (
                           <Badge
                             variant='outline'
-                            className={`shrink-0 text-[10px] ${
-                              progress?.overdue ? 'text-red-600 border-red-300 bg-red-50' : 'text-orange-600 border-orange-300'
-                            }`}
+                            className={cn(
+                              'shrink-0 text-[10px]',
+                              'calendar-chip',
+                              progress?.overdue ? 'calendar-chip--overdue' : 'calendar-chip--deadline'
+                            )}
                           >
                             {dueTime} {progress?.overdue ? 'overdue' : 'due'}
                           </Badge>
@@ -265,7 +249,7 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
                         <TaskDeleteButton taskId={t.id} />
                       </div>
                     </div>
-                    {t.note && <div className='mt-1 truncate text-xs text-gray-600'>{t.note}</div>}
+                    {t.note && <div className='mt-1 truncate text-xs text-muted-foreground'>{t.note}</div>}
                   </Card>
                 );
               })}
