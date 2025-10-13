@@ -109,6 +109,10 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const prevKey = toKey(new Date(todayDate.getTime() - 24 * 60 * 60 * 1000));
   const nextKey = toKey(new Date(todayDate.getTime() + 24 * 60 * 60 * 1000));
   const activeKey = dayKey;
+  const clampedElapsed = Math.min(elapsed, 60);
+  const recordingProgress = clampedElapsed / 60;
+  const recordingProgressDegrees = recordingProgress * 360;
+  const recordingRemaining = Math.max(60 - clampedElapsed, 0);
 
   const pushDate = (key: string) => {
     const params = new URLSearchParams(Array.from(searchParams?.entries?.() || []));
@@ -381,8 +385,20 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                   </Button>
                 </div>
               ) : (
-                <div className='flex w-full flex-col items-center gap-4'>
-                  <div className='text-xs text-muted-foreground'>{`${Math.min(elapsed, 60)}s / 60s`}</div>
+                <div className='flex w-full flex-col items-center gap-5'>
+                  <div className='flex items-center justify-center'>
+                    <div
+                      className='relative flex h-20 w-20 items-center justify-center rounded-full p-[3px]'
+                      style={{
+                        background: `conic-gradient(hsl(var(--primary)) ${recordingProgressDegrees}deg, hsl(var(--muted)) ${recordingProgressDegrees}deg 360deg)`,
+                      }}
+                    >
+                      <div className='flex h-full w-full flex-col items-center justify-center gap-1 rounded-full bg-background shadow-inner'>
+                        <Mic className='h-5 w-5 text-primary' />
+                        <span className='text-sm font-semibold text-foreground'>{`${recordingRemaining}s`}</span>
+                      </div>
+                    </div>
+                  </div>
                   <div className='flex w-full max-w-xs flex-col items-center gap-3'>
                     <Button
                       aria-label='Send recording'
