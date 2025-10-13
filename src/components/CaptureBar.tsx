@@ -345,9 +345,9 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
       </div>
 
       {/* Mode toggle and content */}
-      <div className='w-full max-w-xl'>
+      <div className='w-full max-w-xl flex flex-col items-center'>
         <div className='flex justify-center'>
-          <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
+          <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full flex flex-col items-center">
             <TabsList className='h-8 p-0.5 bg-muted/70 rounded-md'>
               <TabsTrigger value='voice' className='px-3 py-1 text-xs'>Voice</TabsTrigger>
               <TabsTrigger value='text' className='px-3 py-1 text-xs'>Text</TabsTrigger>
