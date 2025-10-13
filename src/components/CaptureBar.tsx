@@ -381,15 +381,26 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                   </Button>
                 </div>
               ) : (
-                <div className='flex flex-col items-center gap-3'>
+                <div className='flex w-full flex-col items-center gap-4'>
                   <div className='text-xs text-muted-foreground'>{`${Math.min(elapsed, 60)}s / 60s`}</div>
-                  <div className='flex items-center justify-center gap-3'>
-                    <Button aria-label='Cancel' variant='ghost' onClick={onCancel}>
-                      <X className='h-5 w-5' />
-                    </Button>
-                    <Button aria-label='Send now' onClick={onSend} disabled={sending}>
-                      <Send className='mr-2 h-4 w-4' />
+                  <div className='flex w-full max-w-xs flex-col items-center gap-3'>
+                    <Button
+                      aria-label='Send recording'
+                      onClick={onSend}
+                      disabled={sending}
+                      className='w-full rounded-full py-3 text-sm font-semibold'
+                    >
+                      <Send className='h-4 w-4' />
                       {sending ? 'Sending…' : 'Send'}
+                    </Button>
+                    <Button
+                      aria-label='Stop recording'
+                      variant='ghost'
+                      size='icon'
+                      onClick={onCancel}
+                      className='rounded-full border border-border/60 bg-background/60'
+                    >
+                      <X className='h-5 w-5' />
                     </Button>
                   </div>
                 </div>
