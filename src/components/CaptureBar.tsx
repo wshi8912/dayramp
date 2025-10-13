@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarClock, ListTodo, Mic, Send, X } from 'lucide-react';
+import { CalendarClock, CheckCheck, ListTodo, Mic, Send, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 type SchemaTask = {
@@ -36,21 +36,10 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [lastSchema, setLastSchema] = useState<Schema | null>(null);
   const [mode, setMode] = useState<'voice' | 'text'>('voice');
 
-  const parsedCount = lastSchema?.tasks?.length ?? 0;
-  const previewHeader = parsedCount ? `Added ${parsedCount} ${parsedCount === 1 ? 'item' : 'items'}` : 'Awaiting structured items';
-  const previewDateLabel = useMemo(() => {
-    if (!lastSchema) return '';
-    if (!lastSchema.date) return lastSchema.timezone;
-    try {
-      const label = new Intl.DateTimeFormat('en-US', {
-        dateStyle: 'medium',
-        timeZone: lastSchema.timezone,
-      }).format(new Date(`${lastSchema.date}T00:00:00`));
-      return `${label} • ${lastSchema.timezone}`;
-    } catch {
-      return `${lastSchema.date} • ${lastSchema.timezone}`;
-    }
-  }, [lastSchema]);
+  const taskCount = lastSchema?.tasks?.filter((task) => task.kind === 'task').length ?? 0;
+  const eventCount = lastSchema?.tasks?.filter((task) => task.kind === 'event').length ?? 0;
+  const parsedCount = taskCount + eventCount;
+  const hasCaptureCounts = parsedCount > 0;
 
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -314,6 +303,10 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
     }
   };
 
+  const handleClosePreview = () => {
+    setLastSchema(null);
+  };
+
   return (
     <div className='flex flex-col items-center gap-4 rounded-lg border bg-card p-5 text-card-foreground'>
       <div className='flex w-full flex-col items-center gap-2'>
@@ -465,13 +458,38 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
       {lastSchema && (
         <div className='mt-4 w-full max-w-2xl'>
           <div className='rounded-2xl border border-muted bg-background/80 p-4 shadow-sm backdrop-blur'>
-            <div className='flex flex-wrap items-center justify-between gap-3 border-b border-muted-foreground/10 pb-3'>
-              <div>
-                <p className='text-xs uppercase tracking-wide text-muted-foreground'>LLM capture preview</p>
-                <p className='text-sm font-medium text-foreground'>{previewHeader}</p>
-                <p className='text-xs text-muted-foreground'>{previewDateLabel || lastSchema.timezone}</p>
+            <div className='relative rounded-xl border border-border/60 bg-card/80 p-6 text-center'>
+              <Button
+                aria-label='Close preview'
+                variant='ghost'
+                size='icon'
+                onClick={handleClosePreview}
+                className='absolute right-2 top-2 h-8 w-8 rounded-full text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+              >
+                <X className='h-4 w-4' />
+              </Button>
+              <div className='flex items-center justify-center gap-2 text-base font-semibold text-foreground'>
+                <span className='flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary'>
+                  <CheckCheck className='h-4 w-4' />
+                </span>
+                <span>Added</span>
               </div>
-              <Badge className='border-emerald-200 bg-emerald-500/15 text-emerald-600'>Added</Badge>
+              {hasCaptureCounts && (
+                <div className='mt-3 flex flex-wrap items-center justify-center gap-2'>
+                  {taskCount > 0 && (
+                    <Badge variant='outline' className='flex items-center gap-1 border-none bg-orange-100 text-orange-700 shadow-sm'>
+                      <ListTodo className='h-3.5 w-3.5' />
+                      {taskCount} {taskCount === 1 ? 'Task' : 'Tasks'}
+                    </Badge>
+                  )}
+                  {eventCount > 0 && (
+                    <Badge variant='outline' className='flex items-center gap-1 border-none bg-sky-100 text-sky-700 shadow-sm'>
+                      <CalendarClock className='h-3.5 w-3.5' />
+                      {eventCount} {eventCount === 1 ? 'Event' : 'Events'}
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
             {lastSchema.tasks?.length ? (
               <ul className='mt-4 space-y-3'>
@@ -494,47 +512,35 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                     }
                     return 'Unscheduled';
                   })();
-                  const chips: Array<{ key: string; label: string; tone: 'time' | 'estimate' | 'priority' | 'confidence' }> = [];
+                  const chips: Array<{ key: string; label: string; tone: 'time' | 'estimate' }> = [];
                   if (timeLabel) chips.push({ key: 'time', label: timeLabel, tone: 'time' });
                   if (t.estimateMin) chips.push({ key: 'estimate', label: `~${t.estimateMin}m`, tone: 'estimate' });
-                  if (t.priority) {
-                    const title = `${t.priority.charAt(0).toUpperCase()}${t.priority.slice(1)} priority`;
-                    chips.push({ key: 'priority', label: title, tone: 'priority' });
-                  }
-                  if (typeof t.confidence === 'number') {
-                    chips.push({
-                      key: 'confidence',
-                      label: `${Math.round(t.confidence * 100)}% confidence`,
-                      tone: 'confidence',
-                    });
-                  }
-                  const chipClass = (tone: 'time' | 'estimate' | 'priority' | 'confidence') => {
+                  const chipClass = (tone: 'time' | 'estimate') => {
                     if (tone === 'time') {
-                      return isEvent ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700';
+                      return isEvent ? 'bg-sky-100 text-sky-700' : 'bg-orange-100 text-orange-700';
                     }
-                    if (tone === 'estimate') return 'bg-amber-100 text-amber-700';
-                    if (tone === 'priority') return 'bg-violet-100 text-violet-700';
-                    return 'bg-slate-100 text-slate-600';
+                    if (tone === 'estimate') return 'bg-slate-100 text-slate-700';
+                    return 'bg-slate-100 text-slate-700';
                   };
                   return (
                     <li
                       key={`${t.title}-${i}`}
                       className={cn(
                         'relative overflow-hidden rounded-xl border bg-card/80 p-4 shadow-sm transition-shadow hover:shadow-md',
-                        isEvent ? 'border-sky-200/80 hover:border-sky-300/80' : 'border-emerald-200/80 hover:border-emerald-300/80'
+                        isEvent ? 'border-sky-200/80 hover:border-sky-300/80' : 'border-orange-200/80 hover:border-orange-300/80'
                       )}
                     >
                       <span
                         className={cn(
                           'absolute inset-y-0 left-0 w-1 rounded-r-full',
-                          isEvent ? 'bg-sky-400/80' : 'bg-emerald-500/80'
+                          isEvent ? 'bg-sky-400/80' : 'bg-orange-400/80'
                         )}
                       />
                       <div className='flex items-start gap-3'>
                         <div
                           className={cn(
                             'flex h-10 w-10 items-center justify-center rounded-full',
-                            isEvent ? 'bg-sky-100 text-sky-600' : 'bg-emerald-100 text-emerald-600'
+                            isEvent ? 'bg-sky-100 text-sky-600' : 'bg-orange-100 text-orange-600'
                           )}
                         >
                           {isEvent ? <CalendarClock className='h-5 w-5' /> : <ListTodo className='h-5 w-5' />}
@@ -551,7 +557,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                                 'uppercase tracking-wide',
                                 isEvent
                                   ? 'border-sky-200 bg-sky-50 text-sky-700'
-                                  : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                  : 'border-orange-200 bg-orange-50 text-orange-700'
                               )}
                             >
                               {isEvent ? 'Event' : 'Task'}
