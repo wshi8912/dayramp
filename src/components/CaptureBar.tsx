@@ -424,7 +424,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                   <div className='text-xs text-muted-foreground'>Processing…</div>
                 </div>
               ) : (
-                <div>
+                <div className="w-[120%] -ml-[10%]">
                   <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
