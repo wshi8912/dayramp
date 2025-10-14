@@ -341,11 +341,6 @@ export function TimelineGrid({
               const isOverdue = isDueOnly && t.dueAt ? (new Date(t.dueAt).getTime() < Date.now()) : false;
               const theme = resolveCalendarTheme(t);
               const IconComponent = theme.icon;
-              const dotClass = cn(
-                theme.dotClass,
-                t.status === 'done' && 'bg-muted-foreground',
-                isDueOnly && isOverdue && 'calendar-dot--overdue'
-              );
               const timeLabel = t.startAt && t.endAt
                 ? `${fmtHM(t.startAt)} → ${fmtHM(t.endAt)}`
                 : t.startAt
@@ -365,7 +360,7 @@ export function TimelineGrid({
                     onClick={(e) => { e.stopPropagation(); onSelect?.(t); }}
                     className={cn(
                       'relative cursor-pointer rounded-md',
-                      density === 'compact' ? 'p-1' : 'p-2',
+                      density === 'compact' ? 'p-0 px-1' : 'p-2',
                       'shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                       theme.cardClass,
                       isDueOnly && 'opacity-90',
@@ -373,9 +368,7 @@ export function TimelineGrid({
                     )}
                     style={{ height }}
                   >
-                    {/* leading dot */}
-                    <span className={cn('absolute left-1 top-1 h-2.5 w-2.5 ring-2 ring-background', dotClass)} />
-                    <div className='ml-4 flex items-center justify-between gap-2'>
+                    <div className='flex items-center justify-between gap-2'>
                       <div className={cn(
                         'flex items-center gap-1 min-w-0 truncate font-medium leading-tight',
                         density === 'compact' ? 'text-xs' : 'text-sm'
@@ -395,11 +388,11 @@ export function TimelineGrid({
                             {timeLabel}
                           </div>
                         )}
-                        <TaskDeleteButton taskId={t.id} size={density === 'compact' ? 'sm' : 'md'} />
+                        <TaskDeleteButton taskId={t.id} size='xs' />
                       </div>
                     </div>
                     {density !== 'compact' && t.note && (
-                      <div className='mt-1 ml-4 truncate text-xs text-foreground/70'>{t.note}</div>
+                      <div className='mt-1 truncate text-xs text-foreground/70'>{t.note}</div>
                     )}
                   </Card>
                 </div>

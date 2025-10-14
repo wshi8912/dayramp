@@ -12,7 +12,7 @@ import { cn } from '@/utils/cn';
 type TaskDeleteButtonProps = {
   taskId: string;
   tone?: 'light' | 'dark';
-  size?: 'sm' | 'md';
+  size?: 'xs' | 'sm' | 'md';
   confirm?: boolean;
 };
 
@@ -55,14 +55,18 @@ export function TaskDeleteButton({
       aria-label='Delete task'
       className={cn(
         'inline-flex items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        size === 'sm' ? 'h-6 w-6 text-[10px]' : 'h-7 w-7 text-xs',
+        size === 'xs' ? 'h-4 w-4 text-[9px]' : size === 'sm' ? 'h-6 w-6 text-[10px]' : 'h-7 w-7 text-xs',
         tone === 'dark'
           ? 'border-white/30 bg-white/10 text-white hover:bg-white/20 focus-visible:ring-offset-0'
           : 'border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10',
         deleting && 'opacity-70'
       )}
     >
-      {deleting ? <Loader2 className='h-3.5 w-3.5 animate-spin' /> : <Trash2 className='h-3.5 w-3.5' />}
+      {deleting ? (
+        <Loader2 className={cn(size === 'xs' ? 'h-2.5 w-2.5' : 'h-3.5 w-3.5', 'animate-spin')} />
+      ) : (
+        <Trash2 className={size === 'xs' ? 'h-2.5 w-2.5' : 'h-3.5 w-3.5'} />
+      )}
     </button>
   );
 }
