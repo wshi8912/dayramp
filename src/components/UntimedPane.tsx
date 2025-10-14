@@ -214,6 +214,7 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
                   >
                     <div className='flex items-center justify-between gap-2'>
                       <div className='flex items-center gap-2 truncate text-sm font-medium leading-tight'>
+                        <TaskStatusBadge taskId={t.id} status={t.status} />
                         <IconComponent className={cn('h-4 w-4 shrink-0', theme.iconClass)} />
                         <span className='truncate'>{t.title}</span>
                       </div>
@@ -245,7 +246,6 @@ export function UntimedPane({ tz, tasks, onSelect }: { tz: string; tasks: Task[]
                             {dueTime} {progress?.overdue ? 'overdue' : 'due'}
                           </Badge>
                         )}
-                        <TaskStatusBadge taskId={t.id} status={t.status} />
                         <TaskDeleteButton taskId={t.id} />
                       </div>
                     </div>
