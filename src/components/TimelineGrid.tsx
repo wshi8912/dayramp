@@ -285,6 +285,20 @@ export function TimelineGrid({
 
         {/* Grid + events */}
         <div className='relative'>
+          {/* Current time label - positioned outside grid container to avoid overflow:hidden clipping */}
+          {currentMin !== null &&
+           currentMin >= VISIBLE_START_MIN &&
+           currentMin <= VISIBLE_END_MIN && (
+            <div
+              className='absolute left-1/2 -translate-x-1/2 rounded px-1.5 py-0.5 text-[10px] font-medium bg-background text-rose-700 border border-rose-300 shadow-sm z-30 pointer-events-none'
+              style={{
+                top: (currentMin - VISIBLE_START_MIN) * PX_PER_MIN + 2, // +2px below the line
+              }}
+            >
+              {currentLabel}
+            </div>
+          )}
+
           {/* Grid background */}
           <div
             ref={containerRef}
@@ -321,10 +335,6 @@ export function TimelineGrid({
               >
                 {/* Small circular marker at the left edge */}
                 <div className='absolute -left-1 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-rose-500' />
-                {/* Small time label for clarity */}
-                <div className='absolute left-2 -top-3 rounded px-1.5 py-0.5 text-[10px] font-medium bg-background text-rose-700 border border-rose-300 shadow-sm'>
-                  {currentLabel}
-                </div>
               </div>
             )}
 
