@@ -387,14 +387,15 @@ export function TimelineGrid({
                           className={cn(
                             'shrink-0',
                             density === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3',
-                            theme.iconClass
+                            theme.iconClass,
+                            'text-white'
                           )}
                         />
-                        <span className='truncate'>{t.title}</span>
+                        <span className='truncate text-white'>{t.title}</span>
                       </div>
                       <div className='flex items-center gap-1.5'>
                         {timeLabel && (
-                          <div className='font-mono text-[11px] tabular-nums text-foreground/70'>
+                          <div className='font-mono text-[11px] tabular-nums text-white/90'>
                             {timeLabel}
                           </div>
                         )}
@@ -402,7 +403,7 @@ export function TimelineGrid({
                       </div>
                     </div>
                     {density !== 'compact' && t.note && (
-                      <div className='mt-1 truncate text-xs text-foreground/70'>{t.note}</div>
+                      <div className='mt-1 truncate text-xs text-white/90'>{t.note}</div>
                     )}
                   </Card>
                 </div>

@@ -80,23 +80,23 @@
     --sidebar-ring: 201 41% 38%;
     /* Ocean sidebar ring */
 
-    --calendar-event-surface: 271 73% 97%;
-    --calendar-event-surface-accent: 268 63% 92%;
-    --calendar-event-border: 269 42% 82%;
-    --calendar-event-ink: 272 44% 34%;
-    --calendar-event-dot: 270 94% 58%;
-    --calendar-event-chip-bg: 270 100% 96%;
-    --calendar-event-chip-border: 269 52% 78%;
-    --calendar-event-chip-ink: 272 40% 40%;
+    --calendar-event-surface: 201 60% 48%;
+    --calendar-event-surface-accent: 201 65% 52%;
+    --calendar-event-border: 201 70% 42%;
+    --calendar-event-ink: 0 0% 100%;
+    --calendar-event-dot: 201 88% 46%;
+    --calendar-event-chip-bg: 201 92% 95%;
+    --calendar-event-chip-border: 201 60% 78%;
+    --calendar-event-chip-ink: 202 54% 34%;
 
-    --calendar-scheduled-surface: 201 78% 96%;
-    --calendar-scheduled-surface-accent: 199 66% 90%;
-    --calendar-scheduled-border: 200 55% 82%;
-    --calendar-scheduled-ink: 202 50% 32%;
-    --calendar-scheduled-dot: 201 88% 46%;
-    --calendar-scheduled-chip-bg: 201 92% 95%;
-    --calendar-scheduled-chip-border: 201 60% 78%;
-    --calendar-scheduled-chip-ink: 202 54% 34%;
+    --calendar-scheduled-surface: 28 75% 52%;
+    --calendar-scheduled-surface-accent: 28 80% 56%;
+    --calendar-scheduled-border: 28 85% 48%;
+    --calendar-scheduled-ink: 0 0% 100%;
+    --calendar-scheduled-dot: 26 94% 50%;
+    --calendar-scheduled-chip-bg: 28 100% 95%;
+    --calendar-scheduled-chip-border: 26 68% 74%;
+    --calendar-scheduled-chip-ink: 24 80% 40%;
 
     --calendar-deadline-surface: 28 88% 96%;
     --calendar-deadline-surface-accent: 28 92% 91%;
@@ -193,23 +193,23 @@
     --sidebar-ring: 201 36% 48%;
     /* Highlight sidebar ring */
 
-    --calendar-event-surface: 268 44% 20%;
-    --calendar-event-surface-accent: 268 48% 26%;
-    --calendar-event-border: 269 56% 42%;
-    --calendar-event-ink: 275 62% 86%;
-    --calendar-event-dot: 270 88% 70%;
-    --calendar-event-chip-bg: 268 46% 26%;
-    --calendar-event-chip-border: 269 56% 46%;
-    --calendar-event-chip-ink: 275 64% 88%;
+    --calendar-event-surface: 201 50% 35%;
+    --calendar-event-surface-accent: 201 55% 40%;
+    --calendar-event-border: 201 60% 48%;
+    --calendar-event-ink: 0 0% 100%;
+    --calendar-event-dot: 200 72% 68%;
+    --calendar-event-chip-bg: 201 42% 24%;
+    --calendar-event-chip-border: 201 55% 44%;
+    --calendar-event-chip-ink: 196 62% 86%;
 
-    --calendar-scheduled-surface: 201 38% 20%;
-    --calendar-scheduled-surface-accent: 201 42% 25%;
-    --calendar-scheduled-border: 201 52% 38%;
-    --calendar-scheduled-ink: 196 58% 84%;
-    --calendar-scheduled-dot: 200 72% 68%;
-    --calendar-scheduled-chip-bg: 201 42% 24%;
-    --calendar-scheduled-chip-border: 201 55% 44%;
-    --calendar-scheduled-chip-ink: 196 62% 86%;
+    --calendar-scheduled-surface: 28 65% 40%;
+    --calendar-scheduled-surface-accent: 28 70% 45%;
+    --calendar-scheduled-border: 28 75% 52%;
+    --calendar-scheduled-ink: 0 0% 100%;
+    --calendar-scheduled-dot: 16 85% 64%;
+    --calendar-scheduled-chip-bg: 18 64% 24%;
+    --calendar-scheduled-chip-border: 18 72% 42%;
+    --calendar-scheduled-chip-ink: 20 82% 86%;
 
     --calendar-deadline-surface: 18 58% 20%;
     --calendar-deadline-surface-accent: 18 64% 24%;
