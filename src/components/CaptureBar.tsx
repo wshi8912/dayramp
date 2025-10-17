@@ -28,6 +28,10 @@ type Schema = {
 };
 
 const WAVE_BAR_COUNT = 12;
+const WAVE_PEAK_FLOOR = 1.5;
+const WAVE_PEAK_DIVISOR = 18;
+const WAVE_ENERGY_DIVISOR = 12;
+const WAVE_SMOOTHING = 0.6;
 
 export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [supported, setSupported] = useState(true);
@@ -210,16 +214,21 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
         }
         currentAnalyser.getByteTimeDomainData(array);
         let sumSquares = 0;
+        let peak = 0;
         for (let i = 0; i < array.length; i += 1) {
           const centered = array[i] - 128;
           sumSquares += centered * centered;
+          const abs = Math.abs(centered);
+          if (abs > peak) peak = abs;
         }
         const rms = Math.sqrt(sumSquares / array.length);
-        const normalized = Math.min(rms / 60, 1);
+        const peakScore = Math.min(Math.max((peak - WAVE_PEAK_FLOOR) / WAVE_PEAK_DIVISOR, 0), 1);
+        const energyScore = Math.min(rms / WAVE_ENERGY_DIVISOR, 1);
+        const normalized = Math.min(peakScore * 0.7 + energyScore * 0.3, 1);
         setWaveLevels((prev) => {
           const base = prev.length === WAVE_BAR_COUNT ? prev : new Array(WAVE_BAR_COUNT).fill(0);
           const last = base[base.length - 1] ?? 0;
-          const smoothed = last * 0.65 + normalized * 0.35;
+          const smoothed = last * (1 - WAVE_SMOOTHING) + normalized * WAVE_SMOOTHING;
           const next = base.slice(1);
           next.push(smoothed);
           return next;
