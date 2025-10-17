@@ -27,7 +27,7 @@ type Schema = {
   tasks: SchemaTask[];
 };
 
-const WAVE_BAR_COUNT = 24;
+const WAVE_BAR_COUNT = 12;
 
 export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [supported, setSupported] = useState(true);
