@@ -308,7 +308,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   };
 
   return (
-    <div className='flex flex-col items-center gap-4 rounded-lg border bg-card p-5 text-card-foreground'>
+    <div className='flex flex-col items-center gap-8 rounded-lg border bg-card p-5 text-card-foreground'>
       <div className='flex w-full flex-col items-center gap-2'>
         <div className='font-mono text-2xl tracking-wider tabular-nums' suppressHydrationWarning>
           {nowStr || '— — : — — : — —'}
@@ -352,7 +352,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
               <TabsTrigger value='voice' className='px-3 py-1 text-xs'>Voice</TabsTrigger>
               <TabsTrigger value='text' className='px-3 py-1 text-xs'>Text</TabsTrigger>
             </TabsList>
-            <TabsContent value='voice' className='mt-2'>
+            <TabsContent value='voice' className='mt-4'>
               {sending ? (
                 <div className='flex flex-col items-center gap-2'>
                   <div className='relative h-16 w-16'>
@@ -365,16 +365,16 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                   <div className='text-xs text-muted-foreground'>Processing…</div>
                 </div>
               ) : !recording ? (
-                <div className='flex flex-col items-center gap-2'>
+                <div className='flex flex-col items-center gap-4'>
                   <Button
                     aria-label='Start voice input'
                     onClick={onStart}
                     disabled={!supported}
                     variant='outline'
                     size='icon'
-                    className='h-16 w-16 rounded-full'
+                    className='h-16 w-16 rounded-full p-0 [&_svg]:size-5'
                   >
-                    <Mic className='h-7 w-7' />
+                    <Mic />
                   </Button>
                 </div>
               ) : (
@@ -386,9 +386,9 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                         background: `conic-gradient(hsl(var(--primary)) ${recordingProgressDegrees}deg, hsl(var(--muted)) ${recordingProgressDegrees}deg 360deg)`,
                       }}
                     >
-                      <div className='flex h-full w-full flex-col items-center justify-center gap-1 rounded-full bg-background shadow-inner'>
+                      <div className='flex h-full w-full flex-col items-center justify-center gap-0 rounded-full bg-background'>
                         <Mic className='h-5 w-5 text-primary' />
-                        <span className='text-sm font-semibold text-foreground'>{`${recordingRemaining}s`}</span>
+                        <span className='text-xs font-semibold text-foreground'>{`${recordingRemaining}s`}</span>
                       </div>
                     </div>
                   </div>
