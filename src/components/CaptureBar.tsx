@@ -474,7 +474,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                   </Button>
                 </div>
               ) : (
-                <div className='flex w-full flex-col items-center gap-5'>
+                <div className='flex w-full flex-col items-center gap-3'>
                   <div className='flex items-center justify-center'>
                     <div
                       className='relative flex h-20 w-20 items-center justify-center rounded-full p-[3px]'
