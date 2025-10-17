@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarClock, CheckCheck, ListTodo, Mic, Send, X } from 'lucide-react';
+
+import { AudioWave } from '@/components/AudioWave';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/utils/cn';
 
 type SchemaTask = {
@@ -25,6 +27,8 @@ type Schema = {
   tasks: SchemaTask[];
 };
 
+const WAVE_BAR_COUNT = 24;
+
 export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [supported, setSupported] = useState(true);
   const [recording, setRecording] = useState(false);
@@ -35,6 +39,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const [text, setText] = useState('');
   const [lastSchema, setLastSchema] = useState<Schema | null>(null);
   const [mode, setMode] = useState<'voice' | 'text'>('voice');
+  const [waveLevels, setWaveLevels] = useState<number[]>(() => new Array(WAVE_BAR_COUNT).fill(0));
 
   const taskCount = lastSchema?.tasks?.filter((task) => task.kind === 'task').length ?? 0;
   const eventCount = lastSchema?.tasks?.filter((task) => task.kind === 'event').length ?? 0;
@@ -44,6 +49,11 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const waveDataRef = useRef<Uint8Array | null>(null);
+  const waveRafRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
   const cancelledRef = useRef(false);
@@ -141,6 +151,88 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
     setElapsed(0);
   };
 
+  const stopVisualization = () => {
+    if (typeof window !== 'undefined' && waveRafRef.current !== null) {
+      window.cancelAnimationFrame(waveRafRef.current);
+    }
+    waveRafRef.current = null;
+    waveDataRef.current = null;
+    try {
+      analyserRef.current?.disconnect();
+    } catch {}
+    analyserRef.current = null;
+    try {
+      sourceNodeRef.current?.disconnect();
+    } catch {}
+    sourceNodeRef.current = null;
+    const ctx = audioContextRef.current;
+    audioContextRef.current = null;
+    if (ctx) {
+      void ctx.close().catch(() => {});
+    }
+    setWaveLevels(() => new Array(WAVE_BAR_COUNT).fill(0));
+  };
+
+  const startVisualization = async (stream: MediaStream) => {
+    if (typeof window === 'undefined') return;
+    const AudioContextClass = (window.AudioContext ?? (window as any).webkitAudioContext) as
+      | (new (...args: any[]) => AudioContext)
+      | undefined;
+    if (!AudioContextClass) return;
+
+    stopVisualization();
+
+    try {
+      const ctx: AudioContext = new AudioContextClass();
+      audioContextRef.current = ctx;
+      if (ctx.state === 'suspended') {
+        try {
+          await ctx.resume();
+        } catch {}
+      }
+      const source = ctx.createMediaStreamSource(stream);
+      sourceNodeRef.current = source;
+
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.85;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      waveDataRef.current = dataArray;
+
+      const updateLevels = () => {
+        const currentAnalyser = analyserRef.current;
+        const array = waveDataRef.current;
+        if (!currentAnalyser || !array) {
+          return;
+        }
+        currentAnalyser.getByteTimeDomainData(array);
+        let sumSquares = 0;
+        for (let i = 0; i < array.length; i += 1) {
+          const centered = array[i] - 128;
+          sumSquares += centered * centered;
+        }
+        const rms = Math.sqrt(sumSquares / array.length);
+        const normalized = Math.min(rms / 60, 1);
+        setWaveLevels((prev) => {
+          const base = prev.length === WAVE_BAR_COUNT ? prev : new Array(WAVE_BAR_COUNT).fill(0);
+          const last = base[base.length - 1] ?? 0;
+          const smoothed = last * 0.65 + normalized * 0.35;
+          const next = base.slice(1);
+          next.push(smoothed);
+          return next;
+        });
+        waveRafRef.current = window.requestAnimationFrame(updateLevels);
+      };
+
+      waveRafRef.current = window.requestAnimationFrame(updateLevels);
+    } catch (err) {
+      console.error('Audio visualization error:', err);
+    }
+  };
+
   const stopAll = () => {
     try {
       recorderRef.current?.stop();
@@ -151,6 +243,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
     chunksRef.current = [];
     setRecording(false);
     clearTimer();
+    stopVisualization();
   };
 
   const onStart = async () => {
@@ -171,6 +264,7 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
       rec.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
         mediaStreamRef.current = null;
+        stopVisualization();
         setRecording(false);
         clearTimer();
         // Auto-send when recording stops (unless user cancelled)
@@ -186,9 +280,11 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
       rec.start();
       setRecording(true);
       startTimer();
+      void startVisualization(stream);
     } catch (e: any) {
       setError('Microphone permission denied or unavailable');
       setSupported(false);
+      stopVisualization();
     }
   };
 
@@ -386,12 +482,13 @@ export function CaptureBar({ tz, dayKey }: { tz: string; dayKey: string }) {
                         background: `conic-gradient(hsl(var(--primary)) ${recordingProgressDegrees}deg, hsl(var(--muted)) ${recordingProgressDegrees}deg 360deg)`,
                       }}
                     >
-                      <div className='flex h-full w-full flex-col items-center justify-center gap-0 rounded-full bg-background'>
+                      <div className='flex h-full w-full flex-col items-center justify-center gap-0 rounded-full bg-background shadow-inner'>
                         <Mic className='h-5 w-5 text-primary' />
                         <span className='text-xs font-semibold text-foreground'>{`${recordingRemaining}s`}</span>
                       </div>
                     </div>
                   </div>
+                  <AudioWave levels={waveLevels} isActive={recording} />
                   <div className='flex w-full max-w-xs flex-col items-center gap-3'>
                     <Button
                       aria-label='Send recording'
