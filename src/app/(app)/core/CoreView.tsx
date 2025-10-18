@@ -60,12 +60,13 @@ export function CoreView({
   const handleCreateAt = async (startUtc: string, endUtc: string) => {
     try {
       const created: any = await postJSON('/api/tasks', {
-        title: 'New task',
+        title: 'New event',
         startAt: startUtc,
         endAt: endUtc,
-        status: 'todo',
+        dueAt: null,
+        status: 'pending',
         source: 'manual',
-        kind: 'task',
+        kind: 'event',
       });
       const ui: UITask = {
         id: created.id,
@@ -74,8 +75,8 @@ export function CoreView({
         startAt: created.start_at ?? undefined,
         endAt: created.end_at ?? undefined,
         dueAt: created.due_at ?? undefined,
-        status: created.status ?? 'todo',
-        kind: created.kind ?? 'task',
+        status: created.status ?? 'pending',
+        kind: created.kind ?? 'event',
       };
       setSelected(ui);
       setOpen(true);

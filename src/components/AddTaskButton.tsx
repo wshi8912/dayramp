@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from 'react';
 
+import { format as formatInTimeZone } from 'date-fns-tz';
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { TASK_KIND_LABELS, TASK_KINDS, TaskKind } from '@/features/tasks/task-kind';
+import { TASK_KIND_LABELS, TaskKind } from '@/features/tasks/task-kind';
 import { postJSON } from '@/libs/api';
 import { toUTC } from '@/libs/tz';
 import { Button } from '@/components/ui/button';
@@ -14,14 +15,20 @@ import { Input } from '@/components/ui/input';
 
 type TimeType = 'none' | 'range' | 'deadline';
 
+const TASK_KIND_ORDER: TaskKind[] = ['event', 'task'];
+const END_OF_DAY_TEMPLATE = "yyyy-MM-dd'T'23:59";
+
+const getEndOfDayLocal = (tz: string) =>
+  formatInTimeZone(new Date(), END_OF_DAY_TEMPLATE, { timeZone: tz });
+
 export function AddTaskButton({ tz }: { tz: string }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
-  const [timeType, setTimeType] = useState<TimeType>('none');
+  const [timeType, setTimeType] = useState<TimeType>('deadline');
   const [startLocal, setStartLocal] = useState('');
   const [endLocal, setEndLocal] = useState('');
-  const [dueLocal, setDueLocal] = useState('');
+  const [dueLocal, setDueLocal] = useState(() => getEndOfDayLocal(tz));
   const [kind, setKind] = useState<TaskKind>('task');
   const [saving, setSaving] = useState(false);
   const router = useRouter();
@@ -40,10 +47,10 @@ export function AddTaskButton({ tz }: { tz: string }) {
   const reset = () => {
     setTitle('');
     setNote('');
-    setTimeType('none');
+    setTimeType('deadline');
     setStartLocal('');
     setEndLocal('');
-    setDueLocal('');
+    setDueLocal(getEndOfDayLocal(tz));
     setKind('task');
   };
 
@@ -91,7 +98,10 @@ export function AddTaskButton({ tz }: { tz: string }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
+    <Dialog open={open} onOpenChange={(v) => {
+      setOpen(v);
+      reset();
+    }}>
       <DialogTrigger asChild>
         <Button
           variant='default'
@@ -134,7 +144,7 @@ export function AddTaskButton({ tz }: { tz: string }) {
           <div className='flex flex-col gap-2'>
             <label className='text-sm'>Type</label>
             <div className='flex gap-2'>
-              {TASK_KINDS.map((option) => (
+              {TASK_KIND_ORDER.map((option) => (
                 <Button
                   key={option}
                   type='button'

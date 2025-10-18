@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { TASK_KIND_LABELS, TASK_KINDS, TaskKind, normalizeTaskKind } from '@/features/tasks/task-kind';
+import { TASK_KIND_LABELS, TaskKind, normalizeTaskKind } from '@/features/tasks/task-kind';
 import {
   TASK_STATUSES,
   TASK_STATUS_LABELS,
@@ -27,6 +27,8 @@ type UITask = {
 };
 
 type TimeType = 'none' | 'range' | 'deadline';
+
+const TASK_KIND_ORDER: TaskKind[] = ['event', 'task'];
 
 export function TaskSheet({
   open,
@@ -182,7 +184,7 @@ export function TaskSheet({
             <div className='flex flex-col gap-2'>
               <label className='text-sm'>Type</label>
               <div className='flex gap-2'>
-                {TASK_KINDS.map((option) => (
+                {TASK_KIND_ORDER.map((option) => (
                   <Button
                     key={option}
                     type='button'
