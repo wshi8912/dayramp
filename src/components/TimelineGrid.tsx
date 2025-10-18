@@ -383,33 +383,35 @@ export function TimelineGrid({
                     style={{ height }}
                   >
                     <div className='flex items-center justify-between gap-2'>
-                      <div className={cn(
-                        'flex items-center gap-1 min-w-0 truncate font-medium leading-tight',
-                        density === 'compact' ? 'text-xs' : 'text-sm'
-                      )}>
+                      <div
+                        className={cn(
+                          'flex items-center gap-1 min-w-0 truncate font-medium leading-tight',
+                          density === 'compact' ? 'text-xs' : 'text-sm'
+                        )}
+                      >
                         <IconComponent
                           className={cn(
                             'shrink-0',
                             density === 'compact' ? 'h-2.5 w-2.5' : 'h-3 w-3',
-                            theme.iconClass,
-                            'text-white'
+                            theme.iconClass
                           )}
                         />
-                        <span className='truncate text-white'>{t.title}</span>
+                        <span className='truncate'>{t.title}</span>
                       </div>
                       <div className='flex items-center gap-1.5'>
                         {dueTimeLabel ? (
                           <div
                             className={cn(
-                              'flex items-center gap-1 rounded-full border border-white/30 bg-white/10 text-white/95',
+                              'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
+                              theme.chipClass,
                               density === 'compact' ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-0.5 text-[10px]'
                             )}
                           >
-                            <span className='uppercase tracking-wide text-white/80'>Due</span>
-                            <span className='font-mono text-[11px] tabular-nums text-white'>{dueTimeLabel}</span>
+                            <span className='uppercase tracking-wide opacity-80'>Due</span>
+                            <span className='font-mono text-[11px] tabular-nums'>{dueTimeLabel}</span>
                           </div>
                         ) : timeLabel && (
-                          <div className='font-mono text-[11px] tabular-nums text-white/90'>
+                          <div className='font-mono text-[11px] tabular-nums opacity-80'>
                             {timeLabel}
                           </div>
                         )}
@@ -417,7 +419,7 @@ export function TimelineGrid({
                       </div>
                     </div>
                     {density !== 'compact' && t.note && (
-                      <div className='mt-1 truncate text-xs text-white/90'>{t.note}</div>
+                      <div className='mt-1 truncate text-xs opacity-80'>{t.note}</div>
                     )}
                   </Card>
                 </div>

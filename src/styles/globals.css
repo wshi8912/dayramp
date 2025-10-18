@@ -98,14 +98,14 @@
     --calendar-scheduled-chip-border: 26 68% 74%;
     --calendar-scheduled-chip-ink: 24 80% 40%;
 
-    --calendar-deadline-surface: 28 75% 52%;
-    --calendar-deadline-surface-accent: 28 80% 56%;
-    --calendar-deadline-border: 28 85% 48%;
-    --calendar-deadline-ink: 0 0% 100%;
-    --calendar-deadline-dot: 26 94% 50%;
-    --calendar-deadline-chip-bg: 28 100% 95%;
-    --calendar-deadline-chip-border: 26 68% 74%;
-    --calendar-deadline-chip-ink: 24 80% 40%;
+    --calendar-deadline-surface: 28 88% 92%;
+    --calendar-deadline-surface-accent: 28 90% 88%;
+    --calendar-deadline-border: 28 78% 74%;
+    --calendar-deadline-ink: 26 64% 34%;
+    --calendar-deadline-dot: 26 84% 48%;
+    --calendar-deadline-chip-bg: 28 86% 90%;
+    --calendar-deadline-chip-border: 28 72% 72%;
+    --calendar-deadline-chip-ink: 26 64% 32%;
 
     --calendar-unscheduled-surface: 206 23% 96%;
     --calendar-unscheduled-surface-accent: 206 23% 92%;
@@ -211,14 +211,14 @@
     --calendar-scheduled-chip-border: 18 72% 42%;
     --calendar-scheduled-chip-ink: 20 82% 86%;
 
-    --calendar-deadline-surface: 28 65% 40%;
-    --calendar-deadline-surface-accent: 28 70% 45%;
-    --calendar-deadline-border: 28 75% 52%;
-    --calendar-deadline-ink: 0 0% 100%;
-    --calendar-deadline-dot: 16 85% 64%;
-    --calendar-deadline-chip-bg: 18 64% 24%;
-    --calendar-deadline-chip-border: 18 72% 42%;
-    --calendar-deadline-chip-ink: 20 82% 86%;
+    --calendar-deadline-surface: 28 52% 28%;
+    --calendar-deadline-surface-accent: 28 56% 32%;
+    --calendar-deadline-border: 28 64% 38%;
+    --calendar-deadline-ink: 28 86% 82%;
+    --calendar-deadline-dot: 16 78% 64%;
+    --calendar-deadline-chip-bg: 28 48% 30%;
+    --calendar-deadline-chip-border: 28 58% 40%;
+    --calendar-deadline-chip-ink: 28 86% 84%;
 
     --calendar-unscheduled-surface: 205 22% 20%;
     --calendar-unscheduled-surface-accent: 205 24% 24%;
