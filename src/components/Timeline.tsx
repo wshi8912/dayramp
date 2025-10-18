@@ -119,8 +119,7 @@ export function Timeline({ tasks, tz, onSelect }: { tasks: Task[]; tz: string; o
                           style={{ zIndex: idx + 1, position: 'relative', top: -overlapLift }}
                           className={cn(
                             'cursor-pointer rounded-md p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                            theme.cardClass,
-                            isDueOnly && 'opacity-90'
+                            theme.cardClass
                           )}
                         >
                           <div className='flex items-center justify-between gap-3'>

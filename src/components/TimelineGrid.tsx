@@ -69,6 +69,7 @@ export function TimelineGrid({
   const paddedVisibleTotalMin = Math.max(1, paddedVisibleEndMin - VISIBLE_START_MIN);
   const paddedEndHour = Math.ceil(paddedVisibleEndMin / 60);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const MIN_BLOCK_MINUTES = 30;
 
   // Current time indicator
   const [currentMin, setCurrentMin] = useState<number | null>(null);
@@ -141,7 +142,7 @@ export function TimelineGrid({
         if (dInfo.dateKey !== dayKey) continue;
         const m = minOfDayFromLocalISO(dInfo.localISO);
         const startMin = Math.max(0, Math.min(24 * 60, m));
-        const endMin = Math.min(24 * 60, startMin + 1);
+        const endMin = Math.min(24 * 60, startMin + MIN_BLOCK_MINUTES);
         arr.push({ id: t.id, src: t, startMin, endMin });
         continue;
       }
@@ -166,7 +167,11 @@ export function TimelineGrid({
           const clippedStart = Math.max(0, Math.min(24 * 60, startMin));
           const clippedEnd = Math.max(0, Math.min(24 * 60, endMin));
           if (clippedEnd <= clippedStart) continue;
-          arr.push({ id: t.id, src: t, startMin: clippedStart, endMin: clippedEnd });
+          const displayEnd = Math.max(
+            clippedEnd,
+            Math.min(24 * 60, clippedStart + MIN_BLOCK_MINUTES)
+          );
+          arr.push({ id: t.id, src: t, startMin: clippedStart, endMin: displayEnd });
         } else {
           // Start-only tasks do not produce calendar blocks
           continue;
@@ -345,19 +350,19 @@ export function TimelineGrid({
               const leftPct = (l.col / cols) * 100;
               const widthPct = (1 / cols) * 100;
               const top = (ev.startMin - VISIBLE_START_MIN) * PX_PER_MIN;
-              const height = Math.max(18, (ev.endMin - ev.startMin) * PX_PER_MIN);
+              const minBlockHeight = MIN_BLOCK_MINUTES * PX_PER_MIN;
+              const height = Math.max(minBlockHeight, (ev.endMin - ev.startMin) * PX_PER_MIN);
               const t = ev.src;
               const isDueOnly = !!t.dueAt && !t.startAt && !t.endAt;
               const isOverdue = isDueOnly && t.dueAt ? (new Date(t.dueAt).getTime() < Date.now()) : false;
               const theme = resolveCalendarTheme(t);
               const IconComponent = theme.icon;
+              const dueTimeLabel = isDueOnly && t.dueAt ? fmtHM(t.dueAt) : '';
               const timeLabel = t.startAt && t.endAt
                 ? `${fmtHM(t.startAt)} → ${fmtHM(t.endAt)}`
                 : t.startAt
                   ? fmtHM(t.startAt)
-                  : t.dueAt
-                    ? `due ${fmtHM(t.dueAt)}`
-                    : '';
+                  : '';
               return (
                 <div
                   key={ev.id}
@@ -373,7 +378,6 @@ export function TimelineGrid({
                       density === 'compact' ? 'p-0 px-1' : 'p-2',
                       'shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                       theme.cardClass,
-                      isDueOnly && 'opacity-90',
                       isDueOnly && isOverdue && 'ring-1 ring-red-400/60 ring-offset-1 ring-offset-background'
                     )}
                     style={{ height }}
@@ -394,7 +398,17 @@ export function TimelineGrid({
                         <span className='truncate text-white'>{t.title}</span>
                       </div>
                       <div className='flex items-center gap-1.5'>
-                        {timeLabel && (
+                        {dueTimeLabel ? (
+                          <div
+                            className={cn(
+                              'flex items-center gap-1 rounded-full border border-white/30 bg-white/10 text-white/95',
+                              density === 'compact' ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-0.5 text-[10px]'
+                            )}
+                          >
+                            <span className='uppercase tracking-wide text-white/80'>Due</span>
+                            <span className='font-mono text-[11px] tabular-nums text-white'>{dueTimeLabel}</span>
+                          </div>
+                        ) : timeLabel && (
                           <div className='font-mono text-[11px] tabular-nums text-white/90'>
                             {timeLabel}
                           </div>
