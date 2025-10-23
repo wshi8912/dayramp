@@ -2,141 +2,248 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Palette memo:
+   - Primary deep ocean: rgb(57, 109, 137) / #396D89 (HSL 201 41% 38%)
+   - Background washed sand: rgb(246, 243, 235) / #F6F3EB (HSL 44 38% 94%)
+*/
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 215 20% 15%;
-    /* Modern dark gray text */
+    --background: 44 40% 97%;
+    /* Soft dune backdrop */
+    --foreground: 202 32% 27%;
+    /* Deep steel-blue text */
 
-    --muted: 210 40% 98%;
-    /* Very light blue-gray for muted elements */
-    --muted-foreground: 215 16% 47%;
-    /* Medium gray for muted text */
+    --muted: 202 23% 79%;
+    /* Misty blue surface */
+    --muted-foreground: 201 23% 39%;
+    /* Subdued slate text */
 
     --popover: 0 0% 100%;
-    /* White background for popovers */
-    --popover-foreground: 215 20% 15%;
-    /* Dark text for popovers */
+    /* Neutral popovers */
+    --popover-foreground: 202 32% 27%;
+    /* Match body text on popovers */
 
-    --border: 214 32% 91%;
-    /* Light blue-gray border */
-    --input: 214 32% 91%;
-    /* Light blue-gray input border */
+    --border: 206 27% 88%;
+    /* Whisper-light border */
+    --input: 206 27% 88%;
+    /* Inputs aligned with border tone */
 
     --card: 0 0% 100%;
-    /* White card background */
-    --card-foreground: 215 20% 15%;
-    /* Dark card text */
+    /* Crisp white cards */
+    --card-foreground: 202 32% 27%;
+    /* Steel-blue card text */
 
-    --primary: 221 83% 53%;
-    /* Modern blue primary (Blue 500) */
-    --primary-foreground: 210 40% 98%;
-    /* Light text on primary */
+    --primary: 201 41% 38%;
+    /* Deep ocean primary */
+    --primary-foreground: 0 0% 100%;
+    /* White text on primary */
 
-    --secondary: 210 40% 96%;
-    /* Very light blue-gray secondary */
-    --secondary-foreground: 215 20% 15%;
-    /* Dark text on secondary */
+    --secondary: 196 39% 69%;
+    /* Airy blue secondary */
+    --secondary-foreground: 202 32% 27%;
+    /* Steel-blue secondary text */
 
-    --accent: 238 77% 95%;
-    /* Very light indigo accent */
-    --accent-foreground: 231 48% 48%;
-    /* Indigo text on accent */
+    --accent: 202 23% 79%;
+    /* Cloudy accent */
+    --accent-foreground: 202 32% 27%;
+    /* Steel-blue accent text */
 
     --destructive: 0 84% 60%;
-    /* Red for destructive actions */
+    /* Keep vivid red for errors */
     --destructive-foreground: 210 40% 98%;
     /* Light text on destructive */
 
-    --ring: 221 83% 53%;
-    /* Blue ring color matching primary */
+    --ring: 201 41% 38%;
+    /* Ring aligned with primary */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 210 40% 98%;
-    /* Very light blue-gray */
+    --sidebar-background: 44 40% 97%;
+    /* Match body background */
+    --sidebar-foreground: 202 32% 27%;
+    /* Steel-blue sidebar text */
 
-    --sidebar-foreground: 215 20% 15%;
-    /* Dark gray text */
+    --sidebar-primary: 201 41% 38%;
+    /* Deep ocean sidebar primary */
+    --sidebar-primary-foreground: 0 0% 100%;
+    /* White text on sidebar primary */
 
-    --sidebar-primary: 221 83% 53%;
-    /* Blue primary */
+    --sidebar-accent: 202 23% 79%;
+    /* Cloudy sidebar accent */
+    --sidebar-accent-foreground: 202 32% 27%;
+    /* Steel-blue accent text */
 
-    --sidebar-primary-foreground: 210 40% 98%;
-    /* Light text on primary */
+    --sidebar-border: 206 27% 88%;
+    /* Subtle sidebar border */
 
-    --sidebar-accent: 210 40% 96%;
-    /* Light blue-gray accent */
+    --sidebar-ring: 201 41% 38%;
+    /* Ocean sidebar ring */
 
-    --sidebar-accent-foreground: 215 20% 15%;
-    /* Dark text on accent */
+    --calendar-event-surface: 201 78% 93%;
+    --calendar-event-surface-accent: 201 82% 89%;
+    --calendar-event-border: 201 62% 74%;
+    --calendar-event-ink: 202 56% 28%;
+    --calendar-event-dot: 201 68% 50%;
+    --calendar-event-chip-bg: 201 76% 91%;
+    --calendar-event-chip-border: 201 60% 74%;
+    --calendar-event-chip-ink: 202 54% 30%;
 
-    --sidebar-border: 214 32% 91%;
-    /* Light border */
+    --calendar-scheduled-surface: 28 92% 93%;
+    --calendar-scheduled-surface-accent: 28 94% 89%;
+    --calendar-scheduled-border: 28 78% 74%;
+    --calendar-scheduled-ink: 22 68% 30%;
+    --calendar-scheduled-dot: 26 82% 48%;
+    --calendar-scheduled-chip-bg: 28 88% 90%;
+    --calendar-scheduled-chip-border: 28 74% 72%;
+    --calendar-scheduled-chip-ink: 24 66% 30%;
 
-    --sidebar-ring: 221 83% 53%;
-    /* Blue ring */
+    --calendar-deadline-surface: 28 88% 92%;
+    --calendar-deadline-surface-accent: 28 90% 88%;
+    --calendar-deadline-border: 28 78% 74%;
+    --calendar-deadline-ink: 26 64% 34%;
+    --calendar-deadline-dot: 26 84% 48%;
+    --calendar-deadline-chip-bg: 28 86% 90%;
+    --calendar-deadline-chip-border: 28 72% 72%;
+    --calendar-deadline-chip-ink: 26 64% 32%;
+
+    --calendar-unscheduled-surface: 206 23% 96%;
+    --calendar-unscheduled-surface-accent: 206 23% 92%;
+    --calendar-unscheduled-border: 207 20% 84%;
+    --calendar-unscheduled-ink: 208 16% 40%;
+    --calendar-unscheduled-dot: 207 20% 46%;
+    --calendar-unscheduled-chip-bg: 207 24% 95%;
+    --calendar-unscheduled-chip-border: 207 18% 82%;
+    --calendar-unscheduled-chip-ink: 208 16% 38%;
+
+    --calendar-overdue-chip-bg: 0 84% 96%;
+    --calendar-overdue-chip-border: 0 74% 78%;
+    --calendar-overdue-chip-ink: 0 82% 42%;
   }
 
   .dark {
-    --background: 222 84% 5%;
-    --foreground: 210 40% 98%;
+    --background: 198 27% 17%;
+    /* Midnight blue backdrop */
+    --foreground: 45 37% 89%;
+    /* Light dune typography */
 
-    --muted: 215 28% 17%;
-    --muted-foreground: 217 11% 65%;
+    --muted: 201 39% 25%;
+    /* Deep tide surface */
+    --muted-foreground: 202 23% 79%;
+    /* Misty blue text */
 
-    --popover: 222 84% 5%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 198 27% 17%;
+    /* Dark popovers */
+    --popover-foreground: 45 37% 89%;
+    /* Light popover text */
 
-    --border: 215 28% 17%;
-    --input: 215 28% 17%;
+    --border: 201 39% 25%;
+    /* Dim tide border */
+    --input: 201 39% 25%;
+    /* Inputs aligned with border */
 
-    --card: 222 84% 5%;
-    --card-foreground: 210 40% 98%;
+    --card: 198 27% 17%;
+    /* Midnight cards */
+    --card-foreground: 45 37% 89%;
+    /* Light card text */
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 84% 5%;
+    --primary: 201 36% 48%;
+    /* Rich ocean highlight */
+    --primary-foreground: 0 0% 100%;
+    /* White text on highlight */
 
-    --secondary: 215 28% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 201 36% 54%;
+    /* Ocean secondary */
+    --secondary-foreground: 45 37% 89%;
+    /* Light text on secondary */
 
-    --accent: 238 77% 15%;
-    --accent-foreground: 238 77% 80%;
+    --accent: 201 40% 38%;
+    /* Deep surf accent */
+    --accent-foreground: 45 37% 89%;
+    /* Light accent text */
 
     --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    /* Darkened red for destructive */
+    --destructive-foreground: 45 37% 89%;
+    /* Light text on destructive */
 
-    --ring: 217 91% 60%;
+    --ring: 201 36% 48%;
+    /* Highlight ring */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 215 28% 17%;
+    --sidebar-background: 201 39% 25%;
+    /* Deep tide sidebar */
+    --sidebar-foreground: 202 23% 79%;
+    /* Misty sidebar text */
 
-    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 201 36% 48%;
+    /* Rich ocean sidebar highlight */
+    --sidebar-primary-foreground: 0 0% 100%;
+    /* White text on highlight */
 
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-accent: 201 36% 54%;
+    /* Ocean sidebar accent */
+    --sidebar-accent-foreground: 45 37% 89%;
+    /* Light accent text */
 
-    --sidebar-primary-foreground: 222 84% 5%;
+    --sidebar-border: 201 39% 25%;
+    /* Dim sidebar border */
 
-    --sidebar-accent: 215 28% 17%;
+    --sidebar-ring: 201 36% 48%;
+    /* Highlight sidebar ring */
 
-    --sidebar-accent-foreground: 210 40% 98%;
+    --calendar-event-surface: 201 44% 24%;
+    --calendar-event-surface-accent: 201 48% 28%;
+    --calendar-event-border: 201 56% 34%;
+    --calendar-event-ink: 198 76% 86%;
+    --calendar-event-dot: 201 64% 56%;
+    --calendar-event-chip-bg: 201 42% 26%;
+    --calendar-event-chip-border: 201 52% 34%;
+    --calendar-event-chip-ink: 198 74% 86%;
 
-    --sidebar-border: 215 28% 17%;
+    --calendar-scheduled-surface: 28 40% 22%;
+    --calendar-scheduled-surface-accent: 28 44% 26%;
+    --calendar-scheduled-border: 28 52% 32%;
+    --calendar-scheduled-ink: 30 78% 85%;
+    --calendar-scheduled-dot: 26 64% 52%;
+    --calendar-scheduled-chip-bg: 28 38% 24%;
+    --calendar-scheduled-chip-border: 28 48% 32%;
+    --calendar-scheduled-chip-ink: 30 76% 86%;
 
-    --sidebar-ring: 217 91% 60%;
+    --calendar-deadline-surface: 28 52% 28%;
+    --calendar-deadline-surface-accent: 28 56% 32%;
+    --calendar-deadline-border: 28 64% 38%;
+    --calendar-deadline-ink: 28 86% 82%;
+    --calendar-deadline-dot: 16 78% 64%;
+    --calendar-deadline-chip-bg: 28 48% 30%;
+    --calendar-deadline-chip-border: 28 58% 40%;
+    --calendar-deadline-chip-ink: 28 86% 84%;
+
+    --calendar-unscheduled-surface: 205 22% 20%;
+    --calendar-unscheduled-surface-accent: 205 24% 24%;
+    --calendar-unscheduled-border: 205 28% 38%;
+    --calendar-unscheduled-ink: 204 26% 82%;
+    --calendar-unscheduled-dot: 204 28% 60%;
+    --calendar-unscheduled-chip-bg: 205 24% 24%;
+    --calendar-unscheduled-chip-border: 205 30% 42%;
+    --calendar-unscheduled-chip-ink: 204 30% 84%;
+
+    --calendar-overdue-chip-bg: 0 72% 26%;
+    --calendar-overdue-chip-border: 0 78% 46%;
+    --calendar-overdue-chip-ink: 15 92% 88%;
   }
 
   ::selection {
-    @apply text-black;
-    @apply bg-cyan-400;
+    color: hsl(0 0% 100%);
+    background-color: hsl(201 36% 54% / 0.85);
   }
 
   *:focus-visible {
     @apply outline;
     @apply outline-2;
     @apply outline-offset-2;
-    @apply outline-pink-500;
+    outline-color: hsl(var(--ring));
   }
 
   * {
@@ -147,6 +254,9 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
+    background-color: hsl(var(--background));
+    background-image: radial-gradient(120% 120% at 0% -20%, hsl(var(--primary) / 0.16), transparent 55%), radial-gradient(120% 120% at 100% 0%, hsl(var(--secondary) / 0.14), hsl(var(--background)) 65%);
+    background-attachment: fixed;
   }
 
   html {
@@ -155,6 +265,10 @@
 
   body {
     @apply h-full;
+  }
+
+  html.dark body {
+    background-image: radial-gradient(110% 110% at 0% -10%, hsl(var(--primary) / 0.22), transparent 55%), radial-gradient(120% 120% at 100% 0%, hsl(var(--secondary) / 0.18), hsl(var(--background)) 65%);
   }
 
   a {
@@ -169,5 +283,139 @@
   .mobile-nav-sheet {
     background-color: hsl(var(--sidebar-background)) !important;
     /* Use !important for testing */
+  }
+}
+
+@layer components {
+  .calendar-tone {
+    border-width: 1px;
+    border-style: solid;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+
+  .calendar-tone--event {
+    border-color: hsl(var(--calendar-event-border));
+    background-color: hsl(var(--calendar-event-surface) / 0.92);
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--calendar-event-surface) / 0.92),
+      hsl(var(--calendar-event-surface-accent) / 0.88)
+    );
+    color: hsl(var(--calendar-event-ink));
+  }
+
+  .calendar-tone--scheduled {
+    border-color: hsl(var(--calendar-scheduled-border));
+    background-color: hsl(var(--calendar-scheduled-surface) / 0.92);
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--calendar-scheduled-surface) / 0.92),
+      hsl(var(--calendar-scheduled-surface-accent) / 0.88)
+    );
+    color: hsl(var(--calendar-scheduled-ink));
+  }
+
+  .calendar-tone--deadline {
+    border-color: hsl(var(--calendar-deadline-border));
+    background-color: hsl(var(--calendar-deadline-surface) / 0.92);
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--calendar-deadline-surface) / 0.92),
+      hsl(var(--calendar-deadline-surface-accent) / 0.88)
+    );
+    color: hsl(var(--calendar-deadline-ink));
+  }
+
+  .calendar-tone--unscheduled {
+    border-color: hsl(var(--calendar-unscheduled-border));
+    background-color: hsl(var(--calendar-unscheduled-surface) / 0.94);
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--calendar-unscheduled-surface) / 0.94),
+      hsl(var(--calendar-unscheduled-surface-accent) / 0.9)
+    );
+    color: hsl(var(--calendar-unscheduled-ink));
+  }
+
+  .calendar-icon {
+    transition: color 160ms ease;
+  }
+
+  .calendar-icon--event {
+    color: hsl(var(--calendar-event-ink));
+  }
+
+  .calendar-icon--scheduled {
+    color: hsl(var(--calendar-scheduled-ink));
+  }
+
+  .calendar-icon--deadline {
+    color: hsl(var(--calendar-deadline-ink));
+  }
+
+  .calendar-icon--unscheduled {
+    color: hsl(var(--calendar-unscheduled-ink));
+  }
+
+  .calendar-dot {
+    border-radius: 9999px;
+  }
+
+  .calendar-dot--event {
+    background-color: hsl(var(--calendar-event-dot));
+  }
+
+  .calendar-dot--scheduled {
+    background-color: hsl(var(--calendar-scheduled-dot));
+  }
+
+  .calendar-dot--deadline {
+    background-color: hsl(var(--calendar-deadline-dot));
+  }
+
+  .calendar-dot--unscheduled {
+    background-color: hsl(var(--calendar-unscheduled-dot));
+  }
+
+  .calendar-dot--overdue {
+    background-color: hsl(0 84% 60%);
+  }
+
+  .calendar-chip {
+    border-width: 1px;
+    border-style: solid;
+    background-color: hsl(var(--calendar-unscheduled-chip-bg));
+    border-color: hsl(var(--calendar-unscheduled-chip-border));
+    color: hsl(var(--calendar-unscheduled-chip-ink));
+  }
+
+  .calendar-chip--event {
+    background-color: hsl(var(--calendar-event-chip-bg));
+    border-color: hsl(var(--calendar-event-chip-border));
+    color: hsl(var(--calendar-event-chip-ink));
+  }
+
+  .calendar-chip--scheduled {
+    background-color: hsl(var(--calendar-scheduled-chip-bg));
+    border-color: hsl(var(--calendar-scheduled-chip-border));
+    color: hsl(var(--calendar-scheduled-chip-ink));
+  }
+
+  .calendar-chip--deadline {
+    background-color: hsl(var(--calendar-deadline-chip-bg));
+    border-color: hsl(var(--calendar-deadline-chip-border));
+    color: hsl(var(--calendar-deadline-chip-ink));
+  }
+
+  .calendar-chip--unscheduled {
+    background-color: hsl(var(--calendar-unscheduled-chip-bg));
+    border-color: hsl(var(--calendar-unscheduled-chip-border));
+    color: hsl(var(--calendar-unscheduled-chip-ink));
+  }
+
+  .calendar-chip--overdue {
+    background-color: hsl(var(--calendar-overdue-chip-bg));
+    border-color: hsl(var(--calendar-overdue-chip-border));
+    color: hsl(var(--calendar-overdue-chip-ink));
   }
 }

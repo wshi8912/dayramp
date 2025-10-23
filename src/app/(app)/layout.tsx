@@ -1,7 +1,6 @@
 import { PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
 
-import { BackgroundGradient } from '@/components/background-gradient';
 import { Logo } from '@/components/logo';
 import { getSession } from '@/features/account/controllers/get-session';
 
@@ -16,8 +15,12 @@ export default async function ProjectsLayout({ children }: PropsWithChildren) {
 
   return (
     <>
-      <BackgroundGradient force='light' />
-      <div className='m-auto flex h-full max-w-[1440px] flex-col px-4'>
+      <div
+        className='fixed inset-0 -z-10'
+        aria-hidden
+        style={{ backgroundColor: 'hsl(var(--background))' }}
+      />
+      <div className='m-auto flex h-full max-w-[1440px] flex-col px-1'>
         <header className='flex items-center justify-between py-8'>
           <Logo />
           <Navigation />
@@ -25,7 +28,7 @@ export default async function ProjectsLayout({ children }: PropsWithChildren) {
         <main className='relative flex-1'>
           <div className='relative h-full'>{children}</div>
         </main>
-        {/* フッターはここで省略 */}
+        {/* Footer omitted here */}
       </div>
     </>
   );

@@ -79,6 +79,24 @@ npm run supabase:status  # ステータス確認
 npm run supabase:reset   # データベースリセット (注意: 全データ削除)
 ```
 
+### 開発用シード (今日の体験データ)
+東京時間の「今日」にタスク/イベントの全パターンを投入できるローカル限定APIとスクリプトを用意しています。
+
+```bash
+# 1. Next.js開発サーバーを起動 (未起動の場合のみ)
+npm run dev
+
+# 2. 開発用シードを投入 (デフォルトは http://localhost:3008)
+npm run dev:seed:today
+
+# 別ポートを利用する場合はベースURLを上書き
+DEV_SEED_BASE_URL=http://localhost:3007 npm run dev:seed:today
+```
+
+- エンドポイント: `POST /api/dev/seed-today`
+- 実行条件: `NODE_ENV=development` かつ Vercel環境では無効
+- 挙動: ノートが`[dev-seed]`で始まる既存データを削除した上で、東京時間「今日」のタイムボックス/開始のみ/締切のみ/未タイムボックス/イベント（進行中・完了）の各ケースを生成します。
+
 ### データベース管理
 ```bash
 npm run migration:new <name>  # 新しいマイグレーション作成
