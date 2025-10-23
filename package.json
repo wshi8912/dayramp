@@ -11,11 +11,14 @@
     "generate-types": "npx supabase gen types typescript --local --schema public > src/types/supabase/database.types.ts",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
+    "seed:build": "node scripts/build-seed.js",
+    "presupabase:reset": "npm run seed:build",
     "supabase:reset": "supabase db reset",
     "supabase:status": "supabase status",
     "migration:new": "supabase migration new",
     "migration:up": "supabase migration up --linked --debug && npm run generate-types",
     "migration:up:local": "supabase migration up --debug && npm run generate-types",
+    "premigration:reset:local": "npm run seed:build",
     "migration:reset:local": "supabase db reset --debug && npm run generate-types",
     "migration:squash": "supabase migration squash --linked",
     "migration:list": "supabase migration list",
@@ -25,7 +28,8 @@
     "db:diff": "supabase db diff --linked",
     "db:remote-commit": "supabase db remote commit",
     "db:lint": "supabase db lint",
-    "db:dump": "supabase db dump -f schema.sql"
+    "db:dump": "supabase db dump -f schema.sql",
+    "dev:seed:today": "node scripts/dev-seed-today.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.32",

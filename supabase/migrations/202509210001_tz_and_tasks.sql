@@ -48,13 +48,21 @@ create table if not exists tasks (
   start_at timestamptz,
   end_at timestamptz,
   due_at timestamptz,
+  kind text not null default 'task',
   estimate_min int,
   priority text check (priority in ('low','mid','high')),
-  status text check (status in ('todo','done','deleted')) not null default 'todo',
+  status text check (status in ('todo','pending','done','deleted')) not null default 'todo',
   source text check (source in ('voice','manual')) not null,
   confidence numeric,
   created_at timestamptz default now() not null,
-  updated_at timestamptz default now() not null
+  updated_at timestamptz default now() not null,
+  constraint tasks_kind_check check (kind in ('task','event')),
+  constraint tasks_event_has_range check (
+    kind <> 'event' or (start_at is not null and end_at is not null)
+  ),
+  constraint tasks_task_no_end_only check (
+    kind <> 'task' or not (end_at is not null and start_at is null)
+  )
 );
 
 alter table tasks enable row level security;
